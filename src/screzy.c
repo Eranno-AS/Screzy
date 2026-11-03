@@ -781,8 +781,8 @@ static void refresh_list(void) {
     char b[128]; int i;
     SendDlgItemMessageA(hPrefs, ID_LIST, LB_RESETCONTENT, 0, 0);
     for (i = 0; i < nwk; i++) {
-        if (wk[i].disabled) snprintf(b, sizeof b, "%s   -   off", wk[i].name);
-        else snprintf(b, sizeof b, "%s   -   %.2fx", wk[i].name, wk[i].speed);
+        if (wk[i].disabled) snprintf(b, sizeof b, "%.80s   -   off", wk[i].name);
+        else snprintf(b, sizeof b, "%.80s   -   %.2fx", wk[i].name, wk[i].speed);
         SendDlgItemMessageA(hPrefs, ID_LIST, LB_ADDSTRING, 0, (LPARAM)b);
     }
 }
