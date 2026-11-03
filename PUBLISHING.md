@@ -10,9 +10,9 @@ Keep the order: the website must be live before you submit to the Store, because
 
 ## Checklist
 
-- [ ] 1. Open the folder and make the first Git commit
-- [ ] 2. Create the GitHub repository and push
-- [ ] 3. Build and test `Screzy.exe` on Windows
+- [x] 1. Open the folder and make the first Git commit
+- [x] 2. Create the GitHub repository and push
+- [x] 3. Build and test `Screzy.exe` on Windows
 - [ ] 4. Reserve the names and copy Product identity in Partner Center
 - [ ] 5. Build the MSIX and test it locally
 - [ ] 6. Take Store screenshots
@@ -51,9 +51,9 @@ If Git asks who you are, run `git config --global user.name "Your Name"` and `gi
 gh repo create Screzy --public --source . --push --description "Scroll easy. Flick to coast. Steer with mouse or rollerbar. Smooth scrolling for Windows."
 ```
 
-Then replace the placeholders with the real address, e.g. `https://github.com/eranno/Screzy`:
+Then replace the placeholders with the real address, e.g. `https://github.com/Eranno-AS/Screzy`:
 
-> **Claude Code prompt:** *Replace every `GITHUB_URL` placeholder in `website/` with `https://github.com/eranno/Screzy` and update the example address in the comment at the top of `website/index.html`. Then commit with the message "Add GitHub links" and push.*
+> **Claude Code prompt:** *Replace every `GITHUB_URL` placeholder in `website/` with `https://github.com/Eranno-AS/Screzy` and update the example address in the comment at the top of `website/index.html`. Then commit with the message "Add GitHub links" and push.*
 
 On GitHub, open the repository's **About** (⚙) and set:
 
