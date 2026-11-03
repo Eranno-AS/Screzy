@@ -17,7 +17,7 @@ Keep the order: the website must be live before you submit to the Store, because
 - [x] 5. Build the MSIX and test it locally
 - [x] 6. Take Store screenshots
 - [x] 7. Put `website/` online at screzy.com
-- [ ] 8. Submit to the Store
+- [x] 8. Submit to the Store
 - [ ] 9. Tag v1.0.0 and publish the GitHub release
 - [ ] 10. After approval: add the Store link everywhere
 
