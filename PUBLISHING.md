@@ -13,8 +13,8 @@ Keep the order: the website must be live before you submit to the Store, because
 - [x] 1. Open the folder and make the first Git commit
 - [x] 2. Create the GitHub repository and push
 - [x] 3. Build and test `Screzy.exe` on Windows
-- [ ] 4. Reserve the names and copy Product identity in Partner Center
-- [ ] 5. Build the MSIX and test it locally
+- [x] 4. Reserve the names and copy Product identity in Partner Center
+- [x] 5. Build the MSIX and test it locally
 - [ ] 6. Take Store screenshots
 - [ ] 7. Put `website/` online at screzy.com
 - [ ] 8. Submit to the Store
