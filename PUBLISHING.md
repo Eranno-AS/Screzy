@@ -76,15 +76,15 @@ Then build:
 
 Test it for real before publishing:
 
-- [ ] Windows' **Lines to scroll at a time** is set to **1** (Settings → Bluetooth & devices → Mouse).
-- [ ] Smooth scrolling works in a browser, Antigravity or VS Code, a PDF reader, Word, and Explorer.
-- [ ] Flick to coast. A left, middle or right click stops it, and the click does **not** open the link under the pointer.
-- [ ] Steering works in both styles, *Distance from start* and *Push*, with the mouse and the RollerMouse rollerbar.
-- [ ] *Wait (ready)* works, as do the Alt + middle click and Alt + G shortcuts.
-- [ ] Per-app rule: **Running apps…** → pick an app → *Disable smoothing* → **Add / Update** → **Apply**.
-- [ ] Tray icon: toggle on/off (it turns grey), **About**, **Website**, **Exit**.
-- [ ] Display scaling at 125% and 150%: no clipped labels in Preferences.
-- [ ] Old GlideScroll settings carry over. If you used a GlideScroll build, start Screzy once: your settings should come with it, and GlideScroll should close.
+- [x] Windows' **Lines to scroll at a time** is set to **1** (Settings → Bluetooth & devices → Mouse).
+- [x] Smooth scrolling works in a browser, Antigravity or VS Code, a PDF reader, Word, and Explorer.
+- [x] Flick to coast. A left, middle or right click stops it, and the click does **not** open the link under the pointer.
+- [x] Steering works in both styles, *Distance from start* and *Push*, with the mouse and the RollerMouse rollerbar.
+- [x] *Wait (ready)* works, as do the Alt + middle click and Alt + G shortcuts.
+- [x] Per-app rule: **Running apps…** → pick an app → *Disable smoothing* → **Add / Update** → **Apply**.
+- [x] Tray icon: toggle on/off (it turns grey), **About**, **Website**, **Exit**.
+- [x] Display scaling at 125% and 150%: no clipped labels in Preferences.
+- [x] Old GlideScroll settings carry over. If you used a GlideScroll build, start Screzy once: your settings should come with it, and GlideScroll should close.
 
 The GitHub Actions workflow also builds `Screzy.exe` on every push (**Actions** tab → latest run → *Artifacts*). That confirms the repository builds cleanly on a fresh machine.
 
