@@ -1,0 +1,5 @@
+build/
+store/out/
+*.o
+*.msix
+*.appx

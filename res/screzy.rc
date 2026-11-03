@@ -1,0 +1,42 @@
+#include <winver.h>
+101 ICON "icons/screzy.ico"
+102 ICON "icons/screzy-off.ico"
+1 24 "screzy.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     1,0,0,0
+PRODUCTVERSION  1,0,0,0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904B0"
+    BEGIN
+      VALUE "CompanyName",      "Eranno AS"
+      VALUE "FileDescription",  "Screzy - easy, smooth scrolling"
+      VALUE "FileVersion",      "1.0.0"
+      VALUE "InternalName",     "Screzy"
+      VALUE "LegalCopyright",   "Copyright (c) 2026 Eranno AS. MIT License."
+      VALUE "OriginalFilename", "Screzy.exe"
+      VALUE "ProductName",      "Screzy"
+      VALUE "ProductVersion",   "1.0.0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x409, 1200
+  END
+END
+300 RCDATA "indicator/coast-32-ready.bin"
+301 RCDATA "indicator/coast-32-down.bin"
+302 RCDATA "indicator/coast-32-up.bin"
+303 RCDATA "indicator/coast-40-ready.bin"
+304 RCDATA "indicator/coast-40-down.bin"
+305 RCDATA "indicator/coast-40-up.bin"
+306 RCDATA "indicator/coast-48-ready.bin"
+307 RCDATA "indicator/coast-48-down.bin"
+308 RCDATA "indicator/coast-48-up.bin"
+309 RCDATA "indicator/coast-64-ready.bin"
+310 RCDATA "indicator/coast-64-down.bin"
+311 RCDATA "indicator/coast-64-up.bin"

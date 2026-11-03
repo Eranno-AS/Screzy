@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screzy privacy statement – Eranno AS</title>
+<meta name="description" content="Screzy collects nothing, sends nothing and connects to nothing.">
+<link rel="icon" href="../assets/screzy.svg" type="image/svg+xml">
+<style>
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("../assets/schibsted-grotesk.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+}
+:root { --paper: #F2F4F8; --panel: #FFFFFF; --ink: #101833; --muted: #586078; --rule: #D7DCE7; --blue: #2E4FD8; --blue-soft: #5B8CFF; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC; --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; }
+}
+:root[data-theme="dark"] { --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC; --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.65 "Schibsted Grotesk", system-ui, "Segoe UI", sans-serif; }
+a { color: var(--blue); text-underline-offset: .18em; }
+:focus-visible { outline: 3px solid var(--blue-soft); outline-offset: 3px; border-radius: 4px; }
+.wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+.top { display: flex; justify-content: space-between; align-items: center; padding-block: 22px; }
+.top a { color: var(--ink); text-decoration: none; }
+.top .brand { font-weight: 700; }
+.top .back { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
+.top .back img { width: 22px; height: 22px; }
+h1 { font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 800; margin: 40px 0 8px; }
+.meta { color: var(--muted); margin: 0 0 28px; }
+.summary { font-size: 1.25rem; line-height: 1.45; font-weight: 600; padding: 20px 22px; background: var(--panel); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0; margin: 0 0 40px; }
+h2 { font-size: 1.35rem; letter-spacing: -.015em; margin: 40px 0 10px; }
+ul { padding-left: 1.2em; }
+li { margin-bottom: 8px; }
+code { font-size: .92em; background: var(--panel); border: 1px solid var(--rule); border-radius: 5px; padding: 1px 5px; overflow-wrap: anywhere; }
+footer { border-top: 1px solid var(--rule); margin-top: 64px; padding-block: 28px 48px; color: var(--muted); font-size: .92rem; }
+footer a { color: var(--muted); }
+@media (max-width: 520px) { .wrap { padding: 0 16px; } .summary { font-size: 1.1rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Eranno AS</span>
+    <a class="back" href="../"><img src="../assets/screzy.svg" alt="">Screzy</a>
+  </header>
+  <main>
+    <h1>Screzy privacy statement</h1>
+    <p class="meta">Effective 3 November 2026. Publisher: Eranno AS, Norway.</p>
+    <p class="summary">Screzy collects nothing, sends nothing and connects to nothing.</p>
+
+    <h2>What Screzy does on your computer</h2>
+    <p>To smooth your scrolling, Screzy has to see some mouse input as it happens:</p>
+    <ul>
+      <li><strong>Mouse-wheel movement.</strong> Screzy intercepts wheel clicks and replaces them with many small, smooth scroll steps. It needs this to work at all.</li>
+      <li><strong>Mouse-button presses (left, middle, right).</strong> Screzy only checks whether a button was pressed, so that a click can stop a coasting scroll. When a click stops a coast, Screzy doesn't pass that click on.</li>
+      <li><strong>Up/down pointer movement, only if you switch on steering.</strong> With the <em>Steer coasts with mouse / rollerbar</em> setting turned on, Screzy uses up/down pointer movement (or, in <em>Distance from start</em>, how far the pointer is above or below where the coast began) while a coast is running to set its speed. At all other times, pointer movement is ignored.</li>
+      <li><strong>The Alt key, only if you switch on the Ready shortcut.</strong> With <em>Alt + middle click</em>, Screzy checks whether Alt is held at the moment you press the middle button. With <em>Alt + G</em>, Windows tells Screzy only when that exact combination is pressed. No other keys are seen.</li>
+      <li><strong>The program name under the pointer</strong> (for example <code>chrome.exe</code>). Screzy checks this so your per-app rules apply, such as a different scroll distance or smoothing turned off for one app.</li>
+      <li><strong>The list of open programs.</strong> Screzy reads this only when you press <em>Running apps…</em> in Preferences, so you can pick one from a menu.</li>
+    </ul>
+    <p>Screzy handles all of this in memory, at the moment it happens. It does not record, log, store or send anything. It does <strong>not</strong> read your typing or any other keys, your screen contents, files, clipboard or browsing.</p>
+
+    <h2>What is stored</h2>
+    <p>Screzy stores only your settings, in one small text file on your own computer:</p>
+    <ul>
+      <li><strong>Downloaded version:</strong> <code>%APPDATA%\Screzy\screzy.ini</code></li>
+      <li><strong>Microsoft Store version:</strong> the app's private storage folder, which Windows manages</li>
+    </ul>
+    <p>The file holds your slider values and any per-app rules you add, which are program names such as <code>chrome.exe</code> with a distance multiplier or "off". To remove it, uninstall Screzy. With the downloaded version, also delete the folder above.</p>
+
+    <h2>Network and third parties</h2>
+    <ul>
+      <li>Screzy makes <strong>no network connections</strong>.</li>
+      <li>It has <strong>no</strong> analytics, telemetry, crash reporting, advertising or user accounts.</li>
+      <li>The <em>Website</em> menu item opens screzy.com in your browser. Nothing happens unless you choose it, and from then on the website's own policy applies.</li>
+      <li>If you install Screzy from the Microsoft Store, Microsoft handles the download and updates under its own privacy terms. Eranno AS gets no personal information from that.</li>
+    </ul>
+
+    <h2>Children</h2>
+    <p>Screzy collects no data from anyone, including children.</p>
+
+    <h2>Changes and contact</h2>
+    <p>If this statement changes, the new version will be published on this page and in the Screzy source repository, with a new effective date.</p>
+    <p>Questions? Contact Eranno AS through <a href="/">screzy.com</a>, or open an issue in the <a href="GITHUB_URL/issues">Screzy repository on GitHub</a>.</p>
+  </main>
+  <footer>© 2026 Eranno AS, Norway · <a href="../">Screzy</a></footer>
+</div>
+</body>
+</html>

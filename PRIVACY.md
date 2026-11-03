@@ -1,0 +1,46 @@
+# Screzy Privacy Statement
+
+*Effective 3 November 2026. Publisher: Eranno AS, Norway.*
+
+**In short: Screzy collects nothing, sends nothing and connects to nothing.**
+
+## What Screzy does on your computer
+
+To smooth your scrolling, Screzy has to see some mouse input as it happens:
+
+- **Mouse-wheel movement.** Screzy intercepts wheel clicks and replaces them with many small, smooth scroll steps. It needs this to work at all.
+- **Mouse-button presses (left, middle, right).** Screzy only checks whether a button was pressed, so that a click can stop a coasting scroll. When a click stops a coast, Screzy doesn't pass that click on.
+- **Up/down pointer movement, only if you switch on steering.** With the *Steer coasts with mouse / rollerbar* setting turned on, Screzy uses up/down pointer movement (or, in *Distance from start*, how far the pointer is above or below where the coast began) while a coast is running to set its speed. At all other times, pointer movement is ignored.
+- **The Alt key, only if you switch on the Ready shortcut.** With *Alt + middle click*, Screzy checks whether Alt is held at the moment you press the middle button. With *Alt + G*, Windows tells Screzy only when that exact combination is pressed. No other keys are seen.
+- **The program name under the pointer** (for example `chrome.exe`). Screzy checks this so your per-app rules apply, such as a different scroll distance or smoothing turned off for one app.
+- **The list of open programs.** Screzy reads this only when you press **Running apps…** in Preferences, so you can pick one from a menu.
+
+Screzy handles all of this in memory, at the moment it happens. It does not record, log, store or send anything.
+
+Screzy does **not** read your typing or any other keys, your screen contents, files, clipboard or browsing.
+
+## What is stored
+
+Screzy stores only your settings, in one small text file on your own computer:
+
+- **Downloaded version:** `%APPDATA%\Screzy\screzy.ini`
+- **Microsoft Store version:** the app's private storage folder, which Windows manages
+
+The file holds your slider values and any per-app rules you add, which are program names such as `chrome.exe` with a distance multiplier or "off". To remove it, uninstall Screzy. With the downloaded version, also delete the folder above.
+
+## Network and third parties
+
+- Screzy makes **no network connections**.
+- It has **no** analytics, telemetry, crash reporting, advertising or user accounts.
+- The **Website** menu item opens screzy.com in your browser. Nothing happens unless you choose it, and from then on the website's own policy applies.
+- If you install Screzy from the Microsoft Store, Microsoft handles the download and updates under its own privacy terms. Eranno AS gets no personal information from that.
+
+## Children
+
+Screzy collects no data from anyone, including children.
+
+## Changes and contact
+
+If this statement changes, the new version will be published at screzy.com/privacy and in the Screzy source repository, with a new effective date.
+
+Questions? Contact Eranno AS through screzy.com, or open an issue in the Screzy repository on GitHub.

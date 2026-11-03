@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Screzy – Easy, smooth scrolling for Windows</title>
+<meta name="description" content="Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy makes every Windows app scroll smoothly. Free and open source from Eranno AS.">
+<link rel="icon" href="assets/screzy.svg" type="image/svg+xml">
+<meta property="og:title" content="Screzy – Easy, smooth scrolling for Windows">
+<meta property="og:description" content="Scroll easy. Flick to coast. Steer with mouse or rollerbar. Free and open source for Windows 10 and 11.">
+<meta property="og:image" content="https://screzy.com/assets/og-image.png">
+<!--
+  Links to fill in once they exist (search for these):
+    STORE_URL   → the Microsoft Store listing, e.g. https://apps.microsoft.com/detail/9XXXXXXXXXXX
+    GITHUB_URL  → the GitHub repository, e.g. https://github.com/your-username/Screzy
+-->
+<style>
+@font-face {
+  font-family: "Schibsted Grotesk";
+  src: url("assets/schibsted-grotesk.woff2") format("woff2");
+  font-weight: 400 900;
+  font-display: swap;
+}
+:root {
+  --paper: #F2F4F8;
+  --panel: #FFFFFF;
+  --ink: #101833;
+  --muted: #586078;
+  --rule: #D7DCE7;
+  --blue: #2E4FD8;
+  --blue-soft: #5B8CFF;
+  --track: #E4E8F1;
+  --bar: #C9D0E0;
+  --bar-strong: #9AA6C2;
+  --on-blue: #FFFFFF;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC;
+    --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; --track: #1D2540;
+    --bar: #2C3656; --bar-strong: #4A5A86; --on-blue: #0E1326;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC;
+  --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; --track: #1D2540;
+  --bar: #2C3656; --bar-strong: #4A5A86; --on-blue: #0E1326;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 400 1.0625rem/1.6 "Schibsted Grotesk", system-ui, "Segoe UI", sans-serif;
+  font-feature-settings: "ss01";
+}
+a { color: var(--blue); text-underline-offset: .18em; }
+a:hover { text-decoration-thickness: 2px; }
+:focus-visible { outline: 3px solid var(--blue-soft); outline-offset: 3px; border-radius: 4px; }
+img { max-width: 100%; height: auto; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+/* ---------- top bar */
+.top { display: flex; justify-content: space-between; align-items: center; padding-block: 22px; }
+.top a { color: var(--ink); text-decoration: none; }
+.top .brand { font-weight: 700; letter-spacing: -.01em; }
+.top nav { display: flex; gap: 22px; font-size: .95rem; }
+.top nav a { color: var(--muted); }
+.top nav a:hover { color: var(--ink); }
+
+/* ---------- hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  gap: 56px;
+  align-items: center;
+  padding-block: 48px 88px;
+}
+.wordmark { position: relative; margin: 0 0 .78em; font-size: clamp(3.2rem, 7.4vw, 5.9rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
+.wordmark .icon { display: block; width: .78em; height: .78em; margin-bottom: .28em; }
+.wordmark .name { position: relative; display: inline-block; isolation: isolate; }
+/* the motion trail: two fading echoes below the name, like the icon's notch */
+.wordmark .name::before, .wordmark .name::after {
+  content: attr(data-text);
+  position: absolute; left: 0; top: 0;
+  pointer-events: none;
+}
+.wordmark .name::before { transform: translateY(.34em); color: color-mix(in srgb, var(--blue) 20%, var(--paper)); z-index: -1; }
+.wordmark .name::after  { transform: translateY(.62em); color: color-mix(in srgb, var(--blue) 9%, var(--paper)); z-index: -2; }
+@media (prefers-reduced-motion: no-preference) {
+  .wordmark .name { animation: glide-in 1.1s cubic-bezier(.16, 1, .3, 1) both; }
+  .wordmark .name::before { animation: trail-1 1.4s cubic-bezier(.16, 1, .3, 1) both; }
+  .wordmark .name::after  { animation: trail-2 1.7s cubic-bezier(.16, 1, .3, 1) both; }
+}
+@keyframes glide-in { from { transform: translateY(-.55em); opacity: 0; } }
+@keyframes trail-1 { from { transform: translateY(-.2em); opacity: 0; } }
+@keyframes trail-2 { from { transform: translateY(-.1em); opacity: 0; } }
+
+.lead { font-size: 1.3rem; line-height: 1.4; font-weight: 600; max-width: 30ch; margin: 0 0 10px; color: var(--ink); }
+.sub { font-size: 1.1rem; line-height: 1.5; max-width: 34ch; margin: 0 0 32px; color: var(--muted); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 13px 20px; border-radius: 10px;
+  font: 600 1rem/1.2 inherit; text-decoration: none;
+  border: 1.5px solid var(--blue);
+}
+.btn-primary { background: var(--blue); color: var(--on-blue); }
+.btn-primary:hover { background: color-mix(in srgb, var(--blue) 88%, var(--ink)); }
+.btn-plain { color: var(--blue); background: transparent; }
+.btn-plain:hover { background: color-mix(in srgb, var(--blue) 8%, transparent); }
+.btn svg { width: 18px; height: 18px; flex: none; }
+.fine { color: var(--muted); font-size: .95rem; margin: 0; }
+
+/* ---------- demo */
+.demo { margin: 0; }
+.demo-frame {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 16px;
+  overflow: hidden;
+}
+.demo-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 14px; border-bottom: 1px solid var(--rule); }
+.demo-bar span { font-size: .9rem; color: var(--muted); }
+.switch { display: inline-flex; background: var(--track); border-radius: 9px; padding: 3px; }
+.switch input { position: absolute; opacity: 0; pointer-events: none; }
+.switch label { padding: 6px 12px; border-radius: 7px; font-size: .9rem; font-weight: 600; color: var(--muted); cursor: pointer; }
+.switch input:checked + label { background: var(--panel); color: var(--ink); box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 18%, transparent); }
+.switch input:focus-visible + label { outline: 3px solid var(--blue-soft); outline-offset: 1px; }
+.pane {
+  height: 400px; overflow-y: auto; overscroll-behavior: contain;
+  scroll-behavior: auto; padding: 14px 0; cursor: default;
+}
+.pane:focus-visible { outline-offset: -3px; }
+.row { display: grid; grid-template-columns: 52px 1fr; align-items: center; height: 26px; }
+.row .n { text-align: right; padding-right: 16px; font-size: .78rem; color: var(--bar-strong); font-variant-numeric: tabular-nums; }
+.row .b { height: 7px; border-radius: 4px; background: var(--bar); }
+.row.h .b { height: 11px; background: var(--bar-strong); }
+.demo figcaption { color: var(--muted); font-size: .95rem; margin-top: 12px; }
+
+/* ---------- sections */
+section.block { padding-block: 72px; border-top: 1px solid var(--rule); }
+h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); line-height: 1.1; letter-spacing: -.03em; font-weight: 750; margin: 0 0 14px; max-width: 22ch; }
+h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 0 6px; font-weight: 700; }
+.intro { color: var(--muted); max-width: 58ch; margin: 0 0 44px; }
+
+.motions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px; }
+.motions p { margin: 0; color: var(--muted); max-width: 36ch; }
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart .axis { stroke: var(--rule); stroke-width: 1.5; }
+.chart .ghost { fill: none; stroke: var(--bar-strong); stroke-width: 1.5; stroke-dasharray: 3 4; }
+.chart .curve { fill: none; stroke: var(--blue); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+.chart .fill { fill: color-mix(in srgb, var(--blue) 10%, transparent); }
+.chart text { font: 500 11px "Schibsted Grotesk", system-ui, sans-serif; fill: var(--muted); }
+
+.more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 40px; list-style: none; padding: 0; margin: 56px 0 0; max-width: 900px; }
+.more li { padding-left: 22px; position: relative; color: var(--ink); }
+.more li::before { content: ""; position: absolute; left: 0; top: .62em; width: 9px; height: 9px; border-radius: 3px; background: var(--blue); opacity: .75; }
+
+.tune { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
+.tune figure { margin: 0; }
+.tune img { border-radius: 10px; border: 1px solid var(--rule); display: block; }
+.tune figcaption { color: var(--muted); font-size: .9rem; margin-top: 10px; }
+.tune p { max-width: 52ch; }
+.tip { margin-top: 28px; padding: 18px 20px; border-left: 3px solid var(--blue); background: var(--panel); border-radius: 0 10px 10px 0; }
+.tip h3 { margin-top: 0; font-size: 1.05rem; }
+.tip p { margin: 0; color: var(--muted); }
+
+.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; }
+.pair h2 { font-size: clamp(1.6rem, 2.6vw, 2rem); }
+.pair p { color: var(--muted); max-width: 48ch; }
+
+footer { border-top: 1px solid var(--rule); padding-block: 32px 48px; color: var(--muted); font-size: .92rem; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
+footer nav { display: flex; gap: 22px; }
+footer a { color: var(--muted); }
+
+@media (max-width: 900px) {
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; padding-block: 24px 64px; }
+  .motions { grid-template-columns: minmax(0, 1fr); gap: 36px; }
+  .tune, .pair { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .more { grid-template-columns: minmax(0, 1fr); }
+  .pane { height: 340px; }
+}
+@media (max-width: 520px) {
+  .wrap { padding: 0 16px; }
+  .top nav { gap: 16px; }
+  .lead { font-size: 1.15rem; }
+  .btn { width: 100%; justify-content: center; }
+  .demo-bar { flex-wrap: wrap; }
+  section.block { padding-block: 56px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="brand">Eranno AS</span>
+    <nav aria-label="Screzy">
+      <a href="privacy/">Privacy</a>
+      <a href="GITHUB_URL">Source code</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div>
+        <h1 class="wordmark">
+          <img class="icon" src="assets/screzy.svg" alt="">
+          <span class="name" data-text="Screzy">Screzy</span>
+        </h1>
+        <p class="lead">Scroll easy. Flick to coast. Steer with mouse or rollerbar.</p>
+        <p class="sub">Easy, smooth mouse-wheel scrolling for every Windows app.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="STORE_URL">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>
+            Get it from Microsoft Store
+          </a>
+          <a class="btn btn-plain" href="GITHUB_URL/releases/latest/download/Screzy.exe">Download .exe</a>
+        </div>
+        <p class="fine">Free and open source, for Windows 10 and 11.</p>
+      </div>
+
+      <figure class="demo">
+        <div class="demo-frame">
+          <div class="demo-bar">
+            <span id="demo-label">Try it with your mouse wheel</span>
+            <div class="switch" role="radiogroup" aria-labelledby="demo-label">
+              <input type="radio" name="mode" id="m-jump" value="jump">
+              <label for="m-jump">Normal wheel</label>
+              <input type="radio" name="mode" id="m-glide" value="glide" checked>
+              <label for="m-glide">Screzy</label>
+            </div>
+          </div>
+          <div class="pane" id="pane" tabindex="0" aria-label="Scrollable demo document"></div>
+        </div>
+        <figcaption>Scroll inside the box. Flick the wheel fast to coast, roll it again to speed up or slow down, and click to stop. Works best with a notched mouse wheel; touchpads already scroll smoothly.</figcaption>
+      </figure>
+    </section>
+
+    <section class="block" aria-labelledby="h-motion">
+      <h2 id="h-motion">What changes when you scroll</h2>
+      <p class="intro">A normal wheel moves the page in instant jumps. Screzy spreads each click over a short, eased glide, timed to your screen's refresh rate. The curves below show scrolling speed over time.</p>
+
+      <div class="motions">
+        <div>
+          <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed over time: three instant spikes for a normal wheel, three smooth humps with Screzy">
+            <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
+            <path class="ghost" d="{{JUMP}}"/>
+            <path class="fill" d="{{GLIDE}} L240,82 L0,82 Z"/>
+            <path class="curve" d="{{GLIDE}}"/>
+            <text x="0" y="96">three wheel clicks</text>
+          </svg>
+          <h3>Each click glides</h3>
+          <p>Instead of an instant jump (dotted), each click eases in and out. Clicks in a row blend into one steady movement.</p>
+        </div>
+        <div>
+          <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed rising as the wheel is spun faster">
+            <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
+            <path class="fill" d="{{ACCEL}} L240,82 L0,82 Z"/>
+            <path class="curve" d="{{ACCEL}}"/>
+            <text x="0" y="96">spinning the wheel faster</text>
+          </svg>
+          <h3>Spin faster, go further</h3>
+          <p>Roll quickly and each click covers more ground, so long pages fly by. Slow, careful scrolling stays precise.</p>
+        </div>
+        <div>
+          <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed after a flick, slowly decaying over a few seconds">
+            <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
+            <path class="fill" d="{{COAST}} L240,82 L0,82 Z"/>
+            <path class="curve" d="{{COAST}}"/>
+            <text x="0" y="96">a quick flick, then hands off</text>
+          </svg>
+          <h3>Flick, and it coasts</h3>
+          <p>Flick the wheel and let go: the page keeps moving and slowly runs down, like on a phone. Wheel clicks speed it up or slow it down while it coasts. A click stops it without clicking anything underneath.</p>
+        </div>
+      </div>
+
+      <ul class="more">
+        <li>Per-app rules: give an app its own speed, or turn smoothing off for games</li>
+        <li>Touchpads, Ctrl + wheel zoom and sideways scrolling are left alone</li>
+        <li>Uses no CPU while you're not scrolling</li>
+        <li>Lives in the tray; the icon turns grey when smoothing is off</li>
+        <li>RollerMouse friendly: steer a coast's speed with the rollerbar</li>
+        <li>Set a top speed for coasts, or let them run until you click</li>
+      </ul>
+    </section>
+
+    <section class="block" aria-labelledby="h-tune">
+      <div class="tune">
+        <div>
+          <h2 id="h-tune">Tuned to your hand in one window</h2>
+          <p>Set how far each click scrolls, how long a glide lasts, how strongly it accelerates, how far and how fast a flick coasts, and whether the rollerbar steers it. A test area lets you feel each change before you keep it.</p>
+          <div class="tip">
+            <h3>For the smoothest result</h3>
+            <p>Set Windows' <em>Lines to scroll at a time</em> to 1 (Settings → Bluetooth &amp; devices → Mouse), or 3 if you prefer, then adjust the distance in Screzy. High Windows values turn small glide steps into visible jumps.</p>
+          </div>
+        </div>
+        <figure>
+          <img src="assets/preferences.png" width="566" height="672" alt="Screzy Preferences window with sliders for distance, glide duration, acceleration and flick coasting, a per-app rules list, and a test area" loading="lazy">
+          <figcaption>The Preferences window.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section class="block">
+      <div class="pair">
+        <div>
+          <h2>Nothing leaves your PC</h2>
+          <p>Screzy never connects to the internet. It has no accounts, ads or analytics. It reads only the mouse input it needs, at the moment you scroll. Your settings stay in one small file on your computer.</p>
+          <p><a href="privacy/">Read the privacy statement</a></p>
+        </div>
+        <div>
+          <h2>Free and open source</h2>
+          <p>Screzy is plain C with no dependencies, published under the MIT License. Read the code, build it yourself, or suggest improvements on GitHub.</p>
+          <p><a href="GITHUB_URL">View the source on GitHub</a></p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>© 2026 Eranno AS, Norway</span>
+    <nav aria-label="Footer">
+      <a href="privacy/">Privacy</a>
+      <a href="GITHUB_URL">GitHub</a>
+      <a href="GITHUB_URL/blob/main/LICENSE">MIT License</a>
+    </nav>
+  </footer>
+</div>
+
+<script>
+(() => {
+  /* ---- build the demo document: numbered rows of text-like bars ---- */
+  const pane = document.getElementById('pane');
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const frag = document.createDocumentFragment();
+  for (let i = 1; i <= 1200; i++) {
+    const row = document.createElement('div');
+    const head = i % 24 === 1;
+    const blank = !head && i % 24 === 0;
+    row.className = 'row' + (head ? ' h' : '');
+    row.innerHTML = '<span class="n">' + i + '</span>' +
+      (blank ? '' : '<span class="b" style="width:' + (head ? 30 + rnd() * 20 : 45 + rnd() * 48).toFixed(1) + '%"></span>');
+    frag.appendChild(row);
+  }
+  pane.appendChild(frag);
+
+  /* ---- the same motion model as the app: spring glide, acceleration, coasting ---- */
+  const DURATION = 0.26, W = 4.74 / DURATION, MAXV = 4000;   // px/s, about 120 lines/s
+  let mode = 'glide';
+  let pos = 0, pending = 0, vel = 0, raf = 0, prevT = 0;
+  let rate = 0, lastT = -9, lastDir = 0, lastRate = 0, lastClick = -9;
+  let armed = false, coasting = false, coastVel = 0, held = false;
+
+  document.querySelectorAll('input[name=mode]').forEach(r =>
+    r.addEventListener('change', e => { mode = e.target.value; stopAll(); }));
+
+  function stopAll() {
+    pending = vel = coastVel = 0; armed = coasting = held = false;
+    cancelAnimationFrame(raf); raf = 0;
+  }
+  const maxPos = () => pane.scrollHeight - pane.clientHeight;
+
+  function frame(ts) {
+    const dt = Math.min(0.05, Math.max(0.001, (ts - prevT) / 1000 || 1 / 60));
+    prevT = ts;
+    const now = performance.now() / 1000;
+    if (armed && !coasting && now - lastClick > Math.max(0.03, 1 / lastRate) && vel !== 0) {
+      coasting = true; coastVel = vel;            // hand off at the speed on screen
+      const lead = 2 * vel / W;
+      if (Math.abs(pending) < Math.abs(lead)) pending = lead;
+    }
+    if (coasting) {
+      coastVel = Math.max(-MAXV, Math.min(MAXV, coastVel));   // max coast speed
+      pending += coastVel * dt;
+      if (!held) coastVel *= Math.exp(-dt / 1.0);  // ~3 s coast unless steered
+      if (Math.abs(coastVel) < 40) { coasting = armed = held = false; coastVel = 0; }
+    }
+    if (pending !== 0) {
+      vel += (W * W * pending - 2 * W * vel) * dt;
+      let step = vel * dt;
+      if (step * pending < 0) { vel = 0; step = 0; }
+      if (Math.abs(step) < 1) step = Math.sign(pending) * Math.min(1, Math.abs(pending));
+      if (Math.abs(step) > Math.abs(pending)) step = pending;
+      pending -= step;
+      pos = Math.min(maxPos(), Math.max(0, pos + step));
+      pane.scrollTop = pos;
+      if (Math.abs(pending) < 0.5) { pending = 0; vel = 0; }
+      if ((pos <= 0 && step < 0) || (pos >= maxPos() && step > 0)) stopAll();  // hit an edge
+    }
+    if (pending !== 0 || vel !== 0 || armed) raf = requestAnimationFrame(frame);
+    else raf = 0;
+  }
+
+  pane.addEventListener('wheel', e => {
+    if (e.ctrlKey || e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    let d = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? pane.clientHeight : 1);
+    if (Math.abs(d) < 40) return;                  // touchpad / high-res wheel: leave native
+    e.preventDefault();
+    if (mode === 'jump') { stopAll(); pane.scrollTop += d; return; }
+
+    const now = performance.now() / 1000, dir = Math.sign(d), gap = now - lastT;
+    if (coasting) {                                // nudges: speed up, or slow down a step
+      const sp = Math.abs(coastVel), cd = Math.sign(coastVel);
+      if (dir === cd) coastVel = cd * Math.max(sp * 1.3, sp + 400);
+      else if (sp * 0.6 < 200) stopAll();
+      else coastVel = cd * sp * 0.6;
+      held = true; lastT = now;
+      return;
+    }
+    if (!raf) pos = pane.scrollTop;
+    if (dir !== lastDir) {
+      const wasCoasting = armed;
+      stopAll();
+      if (wasCoasting) { lastDir = 0; lastT = now; rate = 0; return; }  // opposite click just stops
+    }
+    const clicks = Math.max(1, Math.round(Math.abs(d) / 100));
+    const inst = clicks / Math.max(gap, 0.008);
+    rate = (dir !== lastDir || gap > 0.6) ? 0 : (rate ? 0.5 * rate + 0.5 * inst : inst);
+    const a = Math.min(4, Math.max(1, 1 + 0.5 * (rate - 6) / 4));
+    pending += d * a;
+    if (rate >= 15) armed = true; else if (!coasting) armed = false;
+    lastRate = rate; lastClick = now; lastDir = dir; lastT = now;
+    if (!raf) { prevT = performance.now(); raf = requestAnimationFrame(frame); }
+  }, { passive: false });
+
+  pane.addEventListener('pointerdown', stopAll);
+})();
+</script>
+</body>
+</html>
