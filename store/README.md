@@ -108,7 +108,7 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 
 **runFullTrust justification:**
 
-> Screzy is a Win32 desktop utility that provides smooth mouse-wheel scrolling system-wide. It needs runFullTrust to install a low-level mouse hook (WH_MOUSE_LL), which intercepts vertical wheel events, and to send the smoothed scroll input with SendInput. It reads wheel and mouse-button events, and vertical pointer movement only while a coast is running and only if the user enables steering in Preferences. It does not use a keyboard hook. An optional Ready shortcut uses RegisterHotKey (Alt+G) or checks the Alt state when the middle button is pressed. It collects no data and makes no network connections.
+> Screzy is a Win32 desktop utility that smooths mouse-wheel scrolling system-wide. It needs runFullTrust to install a low-level mouse hook (WH_MOUSE_LL) that intercepts vertical wheel events, and to send the smoothed scrolling with SendInput. It uses no keyboard hook, collects no data and makes no network connections.
 
 **Notes for certification:**
 
