@@ -19,7 +19,7 @@ Keep the order: the website must be live before you submit to the Store, because
 - [x] 7. Put `website/` online at screzy.com
 - [x] 8. Submit to the Store
 - [ ] 9. Tag v1.0.0 and publish the GitHub release
-- [ ] 10. After approval: add the Store link everywhere
+- [x] 10. After approval: add the Store link everywhere
 
 ---
 
