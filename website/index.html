@@ -28,18 +28,21 @@
   --bar: #C9D0E0;
   --bar-strong: #9AA6C2;
   --on-blue: #FFFFFF;
+  --name: #384CBC;      /* the big "Screzy" at the top and bottom */
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC;
     --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; --track: #1D2540;
     --bar: #2C3656; --bar-strong: #4A5A86; --on-blue: #0E1326;
+    --name: #7C94FF;
   }
 }
 :root[data-theme="dark"] {
   --paper: #0E1326; --panel: #151C33; --ink: #E8ECF7; --muted: #9AA3BC;
   --rule: #26304D; --blue: #6F95FF; --blue-soft: #8DAEFF; --track: #1D2540;
   --bar: #2C3656; --bar-strong: #4A5A86; --on-blue: #0E1326;
+  --name: #7C94FF;
 }
 
 * { box-sizing: border-box; }
@@ -95,7 +98,7 @@ img { max-width: 100%; height: auto; }
 }
 .wordmark { position: relative; margin: 0 0 .78em; font-size: clamp(3.2rem, 7.4vw, 5.9rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
 .wordmark .icon { display: block; width: .78em; height: .78em; margin-bottom: .28em; }
-.wordmark .name { position: relative; display: inline-block; isolation: isolate; }
+.wordmark .name { position: relative; display: inline-block; isolation: isolate; color: var(--name); }
 /* the motion trail: two fading echoes below the name, like the icon's notch */
 .wordmark .name::before, .wordmark .name::after {
   content: attr(data-text);
@@ -207,7 +210,7 @@ h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 
 .final > img { width: 56px; height: 56px; margin: 0 auto 20px; display: block; }
 .final h2 { margin: 0 auto .9em; font-size: clamp(2.6rem, 5vw, 4rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
 /* the same motion trail as the big name at the top */
-.final .name { position: relative; display: inline-block; isolation: isolate; }
+.final .name { position: relative; display: inline-block; isolation: isolate; color: var(--name); }
 .final .name::before, .final .name::after { content: attr(data-text); position: absolute; left: 0; top: 0; pointer-events: none; }
 .final .name::before { transform: translateY(.34em); color: color-mix(in srgb, var(--blue) 20%, var(--paper)); z-index: -1; }
 .final .name::after  { transform: translateY(.62em); color: color-mix(in srgb, var(--blue) 9%, var(--paper)); z-index: -2; }
