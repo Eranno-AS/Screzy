@@ -194,12 +194,7 @@ Then upload `website/` again (or let Pages redeploy), and test the Store button.
 
 ## Later releases
 
-1. Make the change, and test as in step 3.
-2. > **Claude Code prompt:** *Prepare release 1.0.1: bump the version in `src/screzy.c` and `res/screzy.rc`, add a CHANGELOG entry for these changes: … and check that README, `store/README.md`, the privacy texts and `website/` still match the app.*
-3. Rebuild, then run `pack.ps1 … -Version 1.0.1.0`. In Partner Center → **Update** (new submission) → upload the new package and fill in *What's new in this version*.
-4. `git tag -a v1.0.1 -m "Screzy 1.0.1"` and `git push origin v1.0.1`.
-
-The Store requires every new package to have a higher version than the last, with `.0` as the fourth part.
+This guide is for the first release. For every update after it, see [`RELEASING.md`](RELEASING.md), or run `/release` in Claude Code.
 
 ## Useful Claude Code prompts
 
