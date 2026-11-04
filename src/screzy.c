@@ -147,6 +147,13 @@ static double get_double(const char *sec, const char *key, double def) {
     return atof(buf);
 }
 
+/* The ini's last-write time when we last read or wrote it, so an edit made in a text editor is noticed. */
+static FILETIME iniStamp;
+static void note_ini_stamp(void) {
+    WIN32_FILE_ATTRIBUTE_DATA d;
+    if (GetFileAttributesExA(iniPath, GetFileExInfoStandard, &d)) iniStamp = d.ftLastWriteTime;
+}
+
 static void load_config(void) {
     char *sec, *p;
     static char buf[8192];
@@ -213,6 +220,7 @@ static void load_config(void) {
         cfg.napps++;
     }
     LeaveCriticalSection(&lock);
+    note_ini_stamp();
 }
 
 /* Find the rule for the process under the cursor. Returns multiplier, or 0 = off. */
@@ -741,6 +749,7 @@ static void save_config(void) {
         else snprintf(b, sizeof b, "%g", cfg.apps[i].speed);
         WritePrivateProfileStringA("apps", cfg.apps[i].name, b, iniPath);
     }
+    note_ini_stamp();
 }
 
 static void tb_label(int i) {
@@ -917,6 +926,61 @@ static int ui_dpi(void) {
 }
 static int S(int v) { return MulDiv(v, ui_dpi(), 96); }
 
+/* Slider positions (in each slider's own units) for the settings in memory. */
+static void slider_positions(double cur[NTB]) {
+    cur[0] = cfg.speed / tbScale[0]; cur[1] = cfg.duration_ms / tbScale[1];
+    cur[2] = cfg.accel / tbScale[2]; cur[3] = cfg.accel_max / tbScale[3];
+    cur[4] = cfg.accel_start / tbScale[4];
+    cur[5] = cfg.coast_time >= 999 ? 21 : cfg.coast_time / tbScale[5];
+    cur[6] = cfg.flick_rate / tbScale[6];
+    cur[7] = cfg.coast_max <= 0 ? 31 : cfg.coast_max / tbScale[7];
+    cur[8] = cfg.steer_sens / tbScale[8];
+    cur[9] = cfg.flick_clicks;
+    cur[10] = cfg.coast_wait ? 1 : cfg.coast_start > 0 ? start_pos(cfg.coast_start) + 1 : 0;
+}
+
+/* Fill every Preferences control from the settings in memory. Used when the window opens, and again
+   when the settings are reloaded from the ini while it is open. */
+static void sync_prefs(HWND h) {
+    double cur[NTB]; int i;
+    slider_positions(cur);
+    for (i = 0; i < NTB; i++) {
+        int p = (int)(cur[i] + 0.5);
+        if (p < tbMin[i]) p = tbMin[i];
+        if (p > tbMax[i]) p = tbMax[i];
+        SendDlgItemMessageA(h, ID_TB0 + i, TBM_SETPOS, TRUE, p);
+    }
+    SendDlgItemMessageA(h, ID_STEER, CB_SETCURSEL, cfg.steer, 0);
+    SendDlgItemMessageA(h, ID_RKEY, CB_SETCURSEL, cfg.ready_key, 0);
+    CheckDlgButton(h, ID_OPPSTOP, cfg.opp_stops ? BST_CHECKED : BST_UNCHECKED);
+    CheckDlgButton(h, ID_UNTIL, cfg.until_click ? BST_CHECKED : BST_UNCHECKED);
+    CheckDlgButton(h, ID_INDIC, cfg.indicator ? BST_CHECKED : BST_UNCHECKED);
+    nwk = cfg.napps;
+    for (i = 0; i < nwk; i++) wk[i] = cfg.apps[i];
+    refresh_list();
+    for (i = 0; i < NTB; i++) tb_label(i);
+    loading = 1;
+    SetDlgItemTextA(h, ID_NAME, "");
+    SetDlgItemTextA(h, ID_ASPD, "1.0");
+    CheckDlgButton(h, ID_AOFF, BST_UNCHECKED);
+    loading = 0;
+    fieldsEdited = 0;
+    set_dirty(0);
+}
+
+static void update_hotkey(void);
+
+/* Re-read the ini and refresh an open Preferences window. Unless `force`, this does nothing when the file
+   is as we last read or wrote it, so it's cheap enough to call whenever the tray menu or Preferences opens. */
+static void reload_settings(int force) {
+    WIN32_FILE_ATTRIBUTE_DATA d;
+    if (!force && (!GetFileAttributesExA(iniPath, GetFileExInfoStandard, &d) ||
+                   CompareFileTime(&d.ftLastWriteTime, &iniStamp) == 0)) return;
+    load_config();
+    update_hotkey();
+    if (hPrefs) sync_prefs(hPrefs);
+}
+
 static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     int i;
     switch (msg) {
@@ -925,15 +989,7 @@ static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         double cur[NTB];
         static char *test;
         hPrefs = h;
-        cur[0] = cfg.speed / tbScale[0]; cur[1] = cfg.duration_ms / tbScale[1];
-        cur[2] = cfg.accel / tbScale[2]; cur[3] = cfg.accel_max / tbScale[3];
-        cur[4] = cfg.accel_start / tbScale[4];
-        cur[5] = cfg.coast_time >= 999 ? 21 : cfg.coast_time / tbScale[5];
-        cur[6] = cfg.flick_rate / tbScale[6];
-        cur[7] = cfg.coast_max <= 0 ? 31 : cfg.coast_max / tbScale[7];
-        cur[8] = cfg.steer_sens / tbScale[8];
-        cur[9] = cfg.flick_clicks;
-        cur[10] = cfg.coast_wait ? 1 : cfg.coast_start > 0 ? start_pos(cfg.coast_start) + 1 : 0;
+        slider_positions(cur);
         /* Layout is written in 96-dpi units and scaled to the display (125%, 150%...),
            so text drawn at the system's size always has room. */
 #define MK(cls, txt, style, x, y, w, ht, id) \
@@ -992,14 +1048,7 @@ static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         MK("BUTTON", "Cancel", WS_TABSTOP, 470, 602, 80, 28, IDCANCEL);
 #undef MK
         set_font(h);
-        nwk = cfg.napps;
-        for (i = 0; i < nwk; i++) wk[i] = cfg.apps[i];
-        refresh_list();
-        for (i = 0; i < NTB; i++) tb_label(i);
-        CheckDlgButton(h, ID_OPPSTOP, cfg.opp_stops ? BST_CHECKED : BST_UNCHECKED);
-        CheckDlgButton(h, ID_UNTIL, cfg.until_click ? BST_CHECKED : BST_UNCHECKED);
-        CheckDlgButton(h, ID_INDIC, cfg.indicator ? BST_CHECKED : BST_UNCHECKED);
-        dirty = loading = fieldsEdited = 0;
+        sync_prefs(h);
         test = (char *)malloc(200 * 64);
         test[0] = 0;
         for (i = 1; i <= 200; i++) { char l[64]; snprintf(l, sizeof l, "Line %d - the quick brown fox jumps over the lazy dog\r\n", i); strcat(test, l); }
@@ -1065,6 +1114,7 @@ static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
 static void show_prefs(void) {
     static int reg;
     HINSTANCE hi = GetModuleHandleA(NULL);
+    reload_settings(0);     /* pick up edits made to the ini file */
     if (hPrefs) { SetForegroundWindow(hPrefs); return; }
     if (!reg) {
         WNDCLASSA wc; INITCOMMONCONTROLSEX ic = { sizeof ic, ICC_BAR_CLASSES };
@@ -1405,7 +1455,9 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     if (msg == WM_TIMER && wp == IND_TIMER) { ind_tick(h); return 0; }
     if (msg == WM_TRAY && (lp == WM_RBUTTONUP || lp == WM_LBUTTONUP)) {
         POINT pt; GetCursorPos(&pt);
-        HMENU m = CreatePopupMenu();
+        HMENU m;
+        reload_settings(0);
+        m = CreatePopupMenu();
         AppendMenuA(m, MF_STRING | (enabled ? MF_CHECKED : 0), ID_TOGGLE, "Smooth scrolling");
         AppendMenuA(m, MF_STRING, ID_PREFS, "Preferences...");
         if (is_packaged()) {
@@ -1437,7 +1489,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             update_tip(); break;
         case ID_PREFS: show_prefs(); break;
         case ID_SETTINGS: ShellExecuteA(NULL, "open", "notepad.exe", iniPath, NULL, SW_SHOW); break;
-        case ID_RELOAD:   load_config(); break;
+        case ID_RELOAD:   reload_settings(1); break;
         case ID_AUTOSTART: set_autostart(!autostart_on()); break;
         case ID_STARTUPSET: store_startup_click(); break;
         case ID_WEBSITE: ShellExecuteA(NULL, "open", APP_URL, NULL, NULL, SW_SHOW); break;
