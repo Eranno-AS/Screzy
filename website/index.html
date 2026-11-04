@@ -9,11 +9,6 @@
 <meta property="og:title" content="Screzy – Easy, smooth scrolling for Windows">
 <meta property="og:description" content="Scroll easy. Flick to coast. Steer with mouse or rollerbar. Free and open source for Windows 10 and 11.">
 <meta property="og:image" content="https://screzy.com/assets/og-image.png">
-<!--
-  Links to fill in once they exist (search for these):
-    STORE_URL   → the Microsoft Store listing, e.g. https://apps.microsoft.com/detail/9PFTRF7TP5PS
-    GITHUB_URL  → the GitHub repository, e.g. https://github.com/Eranno-AS/Screzy
--->
 <style>
 @font-face {
   font-family: "Schibsted Grotesk";
@@ -63,11 +58,32 @@ img { max-width: 100%; height: auto; }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
 
-/* ---------- top bar */
-.top { display: flex; justify-content: space-between; align-items: center; padding-block: 22px; }
+/* ---------- top bar: sticks to the top, section links on wide screens */
+.topbar {
+  position: sticky; top: 0; z-index: 10;
+  background: color-mix(in srgb, var(--paper) 88%, transparent);
+  -webkit-backdrop-filter: saturate(1.4) blur(10px); backdrop-filter: saturate(1.4) blur(10px);
+  border-bottom: 1px solid color-mix(in srgb, var(--rule) 70%, transparent);
+}
+.top { display: flex; justify-content: space-between; align-items: center; gap: 24px; height: 60px; }
 .top a { color: var(--ink); text-decoration: none; }
-.top .brand { font-weight: 700; letter-spacing: -.01em; }
+.top .brand { display: inline-flex; align-items: center; gap: 9px; font-weight: 700; letter-spacing: -.01em; white-space: nowrap; }
+.top .brand img { width: 24px; height: 24px; }
 .top .version { font-weight: 500; color: var(--muted); }
+.top nav { display: flex; align-items: center; gap: 24px; font-size: .95rem; }
+.top nav a { color: var(--muted); white-space: nowrap; }
+.top nav a:hover { color: var(--ink); }
+/* phone menu: a plain <details>, so it works without script */
+.menu { display: none; position: relative; }
+.menu summary { list-style: none; cursor: pointer; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 9px; color: var(--ink); }
+.menu summary::-webkit-details-marker { display: none; }
+.menu summary:hover, .menu[open] summary { background: var(--track); }
+.menu summary svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; }
+.menu-list { position: absolute; right: 0; top: 48px; min-width: 200px; display: flex; flex-direction: column; padding: 8px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; box-shadow: 0 12px 32px -12px color-mix(in srgb, var(--ink) 35%, transparent); }
+.menu-list a { padding: 10px 12px; border-radius: 8px; color: var(--ink); }
+.menu-list a:hover { background: var(--track); }
+.top-right { display: flex; align-items: center; gap: 8px; }
+[id] { scroll-margin-top: 76px; }
 
 /* ---------- hero */
 .hero {
@@ -75,7 +91,7 @@ img { max-width: 100%; height: auto; }
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 56px;
   align-items: center;
-  padding-block: 48px 88px;
+  padding-block: 32px 56px;
 }
 .wordmark { position: relative; margin: 0 0 .78em; font-size: clamp(3.2rem, 7.4vw, 5.9rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
 .wordmark .icon { display: block; width: .78em; height: .78em; margin-bottom: .28em; }
@@ -140,7 +156,7 @@ img { max-width: 100%; height: auto; }
 .demo figcaption { color: var(--muted); font-size: .95rem; margin-top: 12px; }
 
 /* ---------- sections */
-section.block { padding-block: 72px; border-top: 1px solid var(--rule); }
+section.block { padding-block: 56px; border-top: 1px solid var(--rule); }
 h2 { font-size: clamp(1.9rem, 3.4vw, 2.6rem); line-height: 1.1; letter-spacing: -.03em; font-weight: 750; margin: 0 0 14px; max-width: 22ch; }
 h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 0 6px; font-weight: 700; }
 .intro { color: var(--muted); max-width: 58ch; margin: 0 0 44px; }
@@ -154,9 +170,55 @@ h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 
 .chart .fill { fill: color-mix(in srgb, var(--blue) 10%, transparent); }
 .chart text { font: 500 11px "Schibsted Grotesk", system-ui, sans-serif; fill: var(--muted); }
 
-.more { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 40px; list-style: none; padding: 0; margin: 56px 0 0; max-width: 900px; }
-.more li { padding-left: 22px; position: relative; color: var(--ink); }
-.more li::before { content: ""; position: absolute; left: 0; top: .62em; width: 9px; height: 9px; border-radius: 3px; background: var(--blue); opacity: .75; }
+.features { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; list-style: none; padding: 0; margin: 0; }
+.features li { background: var(--panel); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; }
+.features .ico { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 10px; margin-bottom: 14px; color: var(--blue); background: color-mix(in srgb, var(--blue) 11%, transparent); }
+.features .ico svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.features h3 { margin: 0 0 4px; font-size: 1.02rem; }
+.features p { margin: 0; color: var(--muted); font-size: .95rem; line-height: 1.5; }
+
+/* ---------- FAQ */
+.faq { max-width: 760px; }
+.faq details { border-bottom: 1px solid var(--rule); }
+.faq details:first-of-type { border-top: 1px solid var(--rule); }
+.faq summary {
+  display: flex; justify-content: space-between; align-items: center; gap: 16px;
+  padding: 18px 2px; cursor: pointer; list-style: none; font-weight: 650; font-size: 1.08rem;
+}
+.faq summary::-webkit-details-marker { display: none; }
+.faq summary::after {
+  content: ""; flex: none; width: 10px; height: 10px; margin-right: 4px;
+  border-right: 2px solid var(--blue); border-bottom: 2px solid var(--blue);
+  transform: translateY(-3px) rotate(45deg); transition: transform .2s;
+}
+.faq details[open] summary::after { transform: translateY(2px) rotate(-135deg); }
+.faq details p { margin: 0 0 20px; padding-right: 32px; color: var(--muted); max-width: 64ch; }
+
+/* ---------- back to top: shown once the top section is out of view */
+.to-top {
+  position: fixed; right: 20px; bottom: 20px; z-index: 10;
+  display: grid; place-items: center; width: 44px; height: 44px; padding: 0;
+  border: 1px solid var(--rule); border-radius: 50%; cursor: pointer;
+  background: var(--panel); color: var(--blue);
+  box-shadow: 0 8px 24px -10px color-mix(in srgb, var(--ink) 40%, transparent);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity .2s, transform .2s;
+}
+.to-top.show { opacity: 1; transform: none; pointer-events: auto; }
+.to-top:hover { background: color-mix(in srgb, var(--blue) 10%, var(--panel)); }
+.to-top svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- closing call to action */
+.final { text-align: center; padding-block: 64px 72px; border-top: 1px solid var(--rule); }
+.final img { width: 56px; height: 56px; margin: 0 auto 20px; display: block; }
+.final h2 { margin: 0 auto .9em; font-size: clamp(2.6rem, 5vw, 4rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
+/* the same motion trail as the big name at the top */
+.final .name { position: relative; display: inline-block; isolation: isolate; }
+.final .name::before, .final .name::after { content: attr(data-text); position: absolute; left: 0; top: 0; pointer-events: none; }
+.final .name::before { transform: translateY(.34em); color: color-mix(in srgb, var(--blue) 20%, var(--paper)); z-index: -1; }
+.final .name::after  { transform: translateY(.62em); color: color-mix(in srgb, var(--blue) 9%, var(--paper)); z-index: -2; }
+.final p { color: var(--muted); margin: 0 auto 28px; max-width: 46ch; }
+.final .actions { justify-content: center; }
 
 .tune { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; align-items: start; }
 .tune figure { margin: 0; }
@@ -167,38 +229,57 @@ h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 
 .tip h3 { margin-top: 0; font-size: 1.05rem; }
 .tip p { margin: 0; color: var(--muted); }
 
-.pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 56px; }
-.pair h2 { font-size: clamp(1.6rem, 2.6vw, 2rem); }
-.pair p { color: var(--muted); max-width: 48ch; }
 
 footer { border-top: 1px solid var(--rule); padding-block: 32px 48px; color: var(--muted); font-size: .92rem; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
 footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 footer a { color: var(--muted); }
 
 @media (max-width: 900px) {
-  .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; padding-block: 24px 64px; }
+  .hero { grid-template-columns: minmax(0, 1fr); gap: 40px; padding-block: 20px 48px; }
   .motions { grid-template-columns: minmax(0, 1fr); gap: 36px; }
-  .tune, .pair { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-  .more { grid-template-columns: minmax(0, 1fr); }
+  .tune { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .pane { height: 340px; }
+  .top nav { display: none; }
+  .menu { display: block; }
 }
 @media (max-width: 520px) {
+  .features { grid-template-columns: minmax(0, 1fr); }
   .wrap { padding: 0 16px; }
   .lead { font-size: 1.15rem; }
   .btn { width: 100%; justify-content: center; }
   .demo-bar { flex-wrap: wrap; }
-  section.block { padding-block: 56px; }
+  section.block { padding-block: 44px; }
 }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <a class="brand" href="./">Screzy <span class="version">v1.0.0</span></a>
-  </header>
+<header class="topbar">
+  <div class="wrap top">
+    <a class="brand" href="./"><img src="assets/screzy.svg" alt=""> Screzy <span class="version">v1.0.0</span></a>
+    <div class="top-right">
+      <nav aria-label="Sections">
+        <a href="#scrolling">Scrolling</a>
+        <a href="#features">Features</a>
+        <a href="#customize">Customize</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+      <details class="menu">
+        <summary aria-label="Menu"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></summary>
+        <div class="menu-list">
+          <a href="#scrolling">Scrolling</a>
+          <a href="#features">Features</a>
+          <a href="#customize">Customize</a>
+          <a href="#faq">FAQ</a>
+        </div>
+      </details>
+    </div>
+  </div>
+</header>
 
+<div class="wrap">
   <main>
-    <section class="hero">
+    <section class="hero" id="get">
       <div>
         <h1 class="wordmark">
           <img class="icon" src="assets/screzy.svg" alt="">
@@ -213,7 +294,7 @@ footer a { color: var(--muted); }
           </a>
           <a class="btn btn-plain" href="https://github.com/Eranno-AS/Screzy/releases/latest/download/Screzy.exe">Download .exe</a>
         </div>
-        <p class="fine">Free and open source, for Windows 10 and 11.</p>
+        <p class="fine">Free and open source · No internet, no tracking · Windows 10 and 11</p>
       </div>
 
       <figure class="demo">
@@ -233,8 +314,8 @@ footer a { color: var(--muted); }
       </figure>
     </section>
 
-    <section class="block" aria-labelledby="h-motion">
-      <h2 id="h-motion">What changes when you scroll</h2>
+    <section class="block" id="scrolling" aria-labelledby="h-motion">
+      <h2 id="h-motion">Scrolling</h2>
       <p class="intro">A normal wheel moves the page in instant jumps. Screzy spreads each click over a short, eased glide, timed to your screen's refresh rate. The curves below show scrolling speed over time.</p>
 
       <div class="motions">
@@ -270,23 +351,59 @@ footer a { color: var(--muted); }
           <p>Flick the wheel and let go: the page keeps moving and slowly runs down, like on a phone. Wheel clicks speed it up or slow it down while it coasts. A click stops it without clicking anything underneath.</p>
         </div>
       </div>
+    </section>
 
-      <ul class="more">
-        <li>Per-app rules: give an app its own speed, or turn smoothing off for games</li>
-        <li>Touchpads, Ctrl + wheel zoom and sideways scrolling are left alone</li>
-        <li>Uses no CPU while you're not scrolling</li>
-        <li>Lives in the tray; the icon turns grey when smoothing is off</li>
-        <li>Steer a coast's speed by moving the mouse up or down, or with a RollerMouse rollerbar</li>
-        <li>Set a top speed for coasts, or let them run until you click</li>
-        <li>Optional Ready shortcut, Alt + middle click or Alt + G: the wheel or rollerbar then starts a coast without a flick</li>
-        <li>A small badge by the pointer shows a coast's direction, or that it's standing still</li>
+    <section class="block" id="features" aria-labelledby="h-features">
+      <h2 id="h-features">Features</h2>
+      <p class="intro">Screzy lives in the tray and does one thing: make the wheel feel good. Everything else is left as it was.</p>
+      <ul class="features">
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 13h5M8 16h8"/></svg></span>
+          <h3>Per-app rules</h3>
+          <p>Give an app its own scroll distance, or turn smoothing off for it, handy for games.</p>
+        </li>
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><path d="M12 6v6M3 12h18"/></svg></span>
+          <h3>Touchpads left alone</h3>
+          <p>Touchpads, high-resolution wheels, Ctrl + wheel zoom and sideways scrolling work as before.</p>
+        </li>
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="14" width="18" height="6" rx="2"/><circle cx="16.5" cy="17" r="1.2"/><path d="M12 4v6M9 7l3 3 3-3"/></svg></span>
+          <h3>Light and quiet</h3>
+          <p>Lives in the tray and uses no CPU while you're not scrolling. The icon turns grey when smoothing is off.</p>
+        </li>
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="3" width="8" height="14" rx="4"/><path d="M12 6v3M5 20h14M8 17v3M16 17v3"/></svg></span>
+          <h3>Steer a coast</h3>
+          <p>Move the mouse or roll a RollerMouse bar to change a coast's speed. Set a top speed, or let it run until you click.</p>
+        </li>
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="7" height="7" rx="1.5"/><rect x="14" y="7" width="7" height="7" rx="1.5"/><path d="M6.5 18h11"/></svg></span>
+          <h3>Ready shortcut</h3>
+          <p>Optional Alt + middle click or Alt + G: the wheel or rollerbar then starts a coast without a flick.</p>
+        </li>
+        <li>
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l6 15 2-6 6-2z"/><path d="M18 15v6M15.5 17.5 18 15l2.5 2.5"/></svg></span>
+          <h3>Badge by the pointer</h3>
+          <p>A small badge shows which way a coast is going, or that it's ready and standing still.</p>
+        </li>
+        <li id="private">
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.5-3 8.2-7 10-4-1.8-7-5.5-7-10V6z"/><path d="M9 12l2 2 4-4"/></svg></span>
+          <h3>Private</h3>
+          <p>Never connects to the internet. No accounts, ads or analytics. Settings stay in one file on your PC. <a href="privacy/">Privacy statement</a></p>
+        </li>
+        <li id="open-source">
+          <span class="ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M13.5 4l-3 16"/></svg></span>
+          <h3>Open source</h3>
+          <p>Plain C with no dependencies, under the MIT License. Read the code or build it yourself. <a href="https://github.com/Eranno-AS/Screzy">Source on GitHub</a></p>
+        </li>
       </ul>
     </section>
 
-    <section class="block" aria-labelledby="h-tune">
+    <section class="block" id="customize" aria-labelledby="h-tune">
       <div class="tune">
         <div>
-          <h2 id="h-tune">Tuned to your hand in one window</h2>
+          <h2 id="h-tune">Customize</h2>
           <p>Set how far each click scrolls, how long a glide lasts, how strongly it accelerates, how far and how fast a flick coasts, and whether the rollerbar steers it. A test area lets you feel each change before you keep it.</p>
           <div class="tip">
             <h3>For the smoothest result</h3>
@@ -300,18 +417,50 @@ footer a { color: var(--muted); }
       </div>
     </section>
 
-    <section class="block">
-      <div class="pair">
-        <div>
-          <h2>Nothing leaves your PC</h2>
-          <p>Screzy never connects to the internet. It has no accounts, ads or analytics. It reads only the mouse input it needs, at the moment you scroll. Your settings stay in one small file on your computer.</p>
-          <p><a href="privacy/">Read the privacy statement</a></p>
-        </div>
-        <div>
-          <h2>Free and open source</h2>
-          <p>Screzy is plain C with no dependencies, published under the MIT License. Read the code, build it yourself, or suggest improvements on GitHub.</p>
-          <p><a href="https://github.com/Eranno-AS/Screzy">View the source on GitHub</a></p>
-        </div>
+    <section class="block" id="faq" aria-labelledby="h-faq">
+      <h2 id="h-faq">FAQ</h2>
+      <div class="faq">
+        <details>
+          <summary>Which version should I get, the Store or the .exe?</summary>
+          <p>The Microsoft Store version is the easiest. It updates by itself and Windows shows no warnings. The .exe is a single file you can run from anywhere, with nothing to install. Windows may warn about it the first time, because it isn't code-signed: choose <em>More info</em>, then <em>Run anyway</em>. You download new versions of the .exe yourself.</p>
+        </details>
+        <details>
+          <summary>Does it work with my touchpad?</summary>
+          <p>Screzy leaves touchpads alone, because they already scroll smoothly. The same goes for high-resolution and free-spinning wheels that don't click. Screzy smooths the ordinary mouse wheel that moves in notches.</p>
+        </details>
+        <details>
+          <summary>How do I stop a coast?</summary>
+          <p>Click anywhere with the left, middle or right button. That click only stops the coast and isn't passed on, so it can't open a link or press a button by accident. A wheel click the other way slows the coast down, and can stop it instantly if you choose that in Preferences.</p>
+        </details>
+        <details>
+          <summary>Can I turn it off for a game or one app?</summary>
+          <p>Yes. In Preferences, pick the app from <em>Running apps…</em> and choose <em>Disable smoothing</em>, or give it its own scroll distance. To pause Screzy everywhere, switch smoothing off from the tray icon.</p>
+        </details>
+        <details>
+          <summary>Why does one window still scroll in jumps?</summary>
+          <p>Windows that run as administrator are left alone, because Windows doesn't let ordinary apps scroll them. Some older programs and plain text boxes can only scroll by whole lines, so they look steppier than a browser. If an app misbehaves, give it a per-app rule. Also check that your mouse software's own smooth scrolling is off, so the two don't double up.</p>
+        </details>
+        <details>
+          <summary>What does Screzy know about me?</summary>
+          <p>Nothing. It never connects to the internet and has no accounts, ads or analytics. It reads only the mouse input it needs while you scroll, and keeps your settings in one small file on your PC. Details are in the <a href="privacy/">privacy statement</a>.</p>
+        </details>
+        <details>
+          <summary>Which Windows versions does it run on?</summary>
+          <p>Windows 10 and Windows 11.</p>
+        </details>
+      </div>
+    </section>
+
+    <section class="final" aria-labelledby="h-final">
+      <img src="assets/screzy.svg" alt="">
+      <h2 id="h-final"><span class="name" data-text="Screzy">Screzy</span></h2>
+      <p>Free for Windows 10 and 11. Scroll, flick. Feel the difference.</p>
+      <div class="actions">
+        <a class="btn btn-primary" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>
+          Get it from Microsoft Store
+        </a>
+        <a class="btn btn-plain" href="https://github.com/Eranno-AS/Screzy/releases/latest/download/Screzy.exe">Download .exe</a>
       </div>
     </section>
   </main>
@@ -326,6 +475,10 @@ footer a { color: var(--muted); }
     </nav>
   </footer>
 </div>
+
+<button class="to-top" id="to-top" type="button" aria-label="Back to top">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>
+</button>
 
 <script>
 (() => {
@@ -439,6 +592,20 @@ footer a { color: var(--muted); }
   }, { passive: false });
 
   pane.addEventListener('pointerdown', stopAll);
+
+  /* ---- back to top: show it while the top section is out of view ---- */
+  const toTop = document.getElementById('to-top');
+  new IntersectionObserver(([e]) => toTop.classList.toggle('show', !e.isIntersecting))
+    .observe(document.getElementById('get'));
+  toTop.addEventListener('click', () => {
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    window.scrollTo({ top: 0, behavior: still ? 'auto' : 'smooth' });
+  });
+
+  /* ---- close the phone menu after picking a link, or when tapping elsewhere ---- */
+  const menu = document.querySelector('.menu');
+  menu.addEventListener('click', e => { if (e.target.closest('a')) menu.open = false; });
+  document.addEventListener('click', e => { if (!menu.contains(e.target)) menu.open = false; });
 })();
 </script>
 </body>
