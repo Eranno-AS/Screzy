@@ -1,0 +1,4 @@
+# Everything in here stays on this machine. Only these two files are tracked.
+*
+!.gitignore
+!README.md
