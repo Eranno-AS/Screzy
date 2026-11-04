@@ -3,3 +3,4 @@ store/out/
 *.o
 *.msix
 *.appx
+Archive/
