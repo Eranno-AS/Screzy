@@ -1,5 +1,5 @@
 """Generate the raster icons, Store tiles and listing images from one master PNG.
-Run:  python tools/make_assets.py graphics-inbox/master.png            (needs Pillow)
+Run:  python tools/make_assets.py inbox/graphics/master.png            (needs Pillow)
       python tools/make_assets.py master.png --out C:/tmp/preview      (write somewhere else first)
       python tools/make_assets.py master.png --only tiles              (icons | tiles | listing)
 

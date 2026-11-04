@@ -26,7 +26,7 @@ It is a Windows 10/11 system-tray utility that makes mouse-wheel scrolling smoot
 | `PUBLISHING.md` | Step-by-step guide for the first release (accounts, names, website, first Store submission) |
 | `RELEASING.md` | How to ship every later update; the `release` skill in `.claude/skills/release/` follows it |
 | `tools/` | `make_indicator.py` (coast badges) and `make_assets.py` (icons, Store tiles and listing images from one master PNG) |
-| `graphics-inbox/` | Git-ignored scratch folder for drafts and unfinished graphics. Never published |
+| `inbox/` | Git-ignored scratch folder for drafts and unfinished work (graphics go in `inbox/graphics/`). Never published |
 
 ## Build
 
@@ -56,7 +56,7 @@ Flags: `-O2 -Wall -mwindows -static`, libs `-lwinmm -ldwmapi -lcomctl32 -lshlwap
 3. **DPI.** The process is system-DPI aware. Every pixel in the Preferences layout goes through `S()`. Test at 100%, 125% and 150%: labels have been clipped before.
 4. **Version.** When releasing, bump `APP_VERSION` in `src/screzy.c`, `FILEVERSION`/`PRODUCTVERSION` and the strings in `res/screzy.rc`, `CHANGELOG.md`, and pass `-Version x.y.z.0` to `store/pack.ps1`. The Store requires the 4th part to be `0`.
 5. **Docs stay in sync.** A change to settings, defaults or behaviour must also update `README.md` (Settings table), `CHANGELOG.md`, `store/README.md` (listing and reviewer notes), `website/index.html` where relevant, and `docs/preferences.png` if the window changed.
-6. **Anything under `website/` is public on push** (Cloudflare Pages redeploys it). Only finished files that something references go in `website/`, `store/` or `res/`. Drafts, exports and AI generations stay in `graphics-inbox/`.
+6. **Anything under `website/` is public on push** (Cloudflare Pages redeploys it). Only finished files that something references go in `website/`, `store/` or `res/`. Drafts, exports and AI generations stay in `inbox/`.
 7. **Recommended Windows setting** is *Lines to scroll at a time = 1* (3 as the alternative). Keep that consistent everywhere.
 
 ## Testing

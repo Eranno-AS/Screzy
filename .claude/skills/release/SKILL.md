@@ -20,4 +20,4 @@ Do these, in order, and report each result:
 
 Stop there. Tell the user the Partner Center steps are theirs (RELEASING.md, step 7): upload the package, write *What's new*, submit.
 
-For a graphics-only change, use the table in RELEASING.md to see whether a new version is needed at all. Never put unfinished graphics under `website/`, `store/` or `res/`: drafts live in `graphics-inbox/`.
+For a graphics-only change, use the table in RELEASING.md to see whether a new version is needed at all. Never put unfinished graphics under `website/`, `store/` or `res/`: drafts live in `inbox/` (graphics in `inbox/graphics/`).

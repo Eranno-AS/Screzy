@@ -14,7 +14,7 @@ Claude Code can do the mechanical steps: run `/release` and say what changed. Th
 | Store listing text, screenshots, box art, poster, logo | `store/listing/`, Partner Center | A listing update only: no new package, but it is still a submission and gets certified |
 | Website, README, `docs/preferences.png` | `website/`, `README.md`, `docs/` | A push: Cloudflare redeploys the site by itself |
 
-Everything under `website/` is public the moment it is pushed. Keep drafts and working files in `graphics-inbox/` (ignored by Git) and copy only finished, referenced files into the tree.
+Everything under `website/` is public the moment it is pushed. Keep drafts and working files in `inbox/` (ignored by Git) and copy only finished, referenced files into the tree.
 
 ## Full release (new version)
 
@@ -44,12 +44,12 @@ Store users get the update automatically once it is approved. People with the pl
 
 ## New graphics
 
-1. Put drafts and exports in `graphics-inbox/`. Nothing in it is ever committed.
+1. Put drafts and exports in `inbox/graphics/`. Nothing in it is ever committed.
 2. Pick the finished icon: a square PNG, 1024 px or more, with transparent corners.
 3. Generate everything from it, previewing first:
    ```powershell
-   python tools\make_assets.py graphics-inbox\master.png --out graphics-inbox\preview
-   python tools\make_assets.py graphics-inbox\master.png
+   python tools\make_assets.py inbox\graphics\master.png --out inbox\graphics\preview
+   python tools\make_assets.py inbox\graphics\master.png
    ```
    The second command overwrites `res/icons/*.ico`, `store/Assets/*.png` and `store/listing/*.png`. Use `--only icons`, `--only tiles` or `--only listing` for one group.
 4. Make by hand what the script can't: `website/assets/screzy.svg`, `website/assets/og-image.png`, the coast indicators (`tools/make_indicator.py`), and screenshots.
