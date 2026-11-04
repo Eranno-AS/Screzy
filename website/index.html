@@ -115,18 +115,12 @@ img { max-width: 100%; height: auto; }
 
 .lead { font-size: 1.3rem; line-height: 1.4; font-weight: 600; max-width: 30ch; margin: 0 0 10px; color: var(--ink); }
 .sub { font-size: 1.1rem; line-height: 1.5; max-width: 34ch; margin: 0 0 32px; color: var(--muted); }
-.actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 18px; }
-.btn {
-  display: inline-flex; align-items: center; gap: 10px;
-  padding: 13px 20px; border-radius: 10px;
-  font: 600 1rem/1.2 inherit; text-decoration: none;
-  border: 1.5px solid var(--blue);
-}
-.btn-primary { background: var(--blue); color: var(--on-blue); }
-.btn-primary:hover { background: color-mix(in srgb, var(--blue) 88%, var(--ink)); }
-.btn-plain { color: var(--blue); background: transparent; }
-.btn-plain:hover { background: color-mix(in srgb, var(--blue) 8%, transparent); }
-.btn svg { width: 18px; height: 18px; flex: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; margin-bottom: 18px; }
+/* Microsoft's official badge, hosted here (assets/ms-store-badge-*.svg): no script, no outside request */
+.store-badge { display: inline-block; line-height: 0; border-radius: 8px; transition: transform .15s; }
+.store-badge:hover { transform: translateY(-1px); }
+.store-badge img { width: auto; height: 56px; }
+.actions .alt { color: var(--muted); font-size: .95rem; }
 .fine { color: var(--muted); font-size: .95rem; margin: 0; }
 
 /* ---------- demo */
@@ -210,7 +204,7 @@ h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 
 
 /* ---------- closing call to action */
 .final { text-align: center; padding-block: 64px 72px; border-top: 1px solid var(--rule); }
-.final img { width: 56px; height: 56px; margin: 0 auto 20px; display: block; }
+.final > img { width: 56px; height: 56px; margin: 0 auto 20px; display: block; }
 .final h2 { margin: 0 auto .9em; font-size: clamp(2.6rem, 5vw, 4rem); line-height: .95; font-weight: 800; letter-spacing: -.045em; }
 /* the same motion trail as the big name at the top */
 .final .name { position: relative; display: inline-block; isolation: isolate; }
@@ -247,7 +241,6 @@ footer a { color: var(--muted); }
   .features { grid-template-columns: minmax(0, 1fr); }
   .wrap { padding: 0 16px; }
   .lead { font-size: 1.15rem; }
-  .btn { width: 100%; justify-content: center; }
   .demo-bar { flex-wrap: wrap; }
   section.block { padding-block: 44px; }
 }
@@ -288,11 +281,13 @@ footer a { color: var(--muted); }
         <p class="lead">Scroll easy. Flick to coast. Steer with mouse or rollerbar.</p>
         <p class="sub">Easy, smooth mouse-wheel scrolling for every Windows app.</p>
         <div class="actions">
-          <a class="btn btn-primary" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>
-            Get it from Microsoft Store
+          <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
+            <picture>
+              <source srcset="assets/ms-store-badge-light.svg" media="(prefers-color-scheme: dark)">
+              <img src="assets/ms-store-badge-dark.svg" width="205" height="56" alt="Download from the Microsoft Store">
+            </picture>
           </a>
-          <a class="btn btn-plain" href="https://github.com/Eranno-AS/Screzy/releases/latest/download/Screzy.exe">Download .exe</a>
+          <span class="alt">Can't use the Store? <a href="https://github.com/Eranno-AS/Screzy/releases/latest">Download the .exe</a></span>
         </div>
         <p class="fine">Free and open source · No internet, no tracking · Windows 10 and 11</p>
       </div>
@@ -456,11 +451,12 @@ footer a { color: var(--muted); }
       <h2 id="h-final"><span class="name" data-text="Screzy">Screzy</span></h2>
       <p>Free for Windows 10 and 11. Scroll, flick. Feel the difference.</p>
       <div class="actions">
-        <a class="btn btn-primary" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 5.5 10.5 4.4v7.1H3zM11.5 4.3 21 3v8.5h-9.5zM3 12.5h7.5v7.1L3 18.5zM11.5 12.5H21V21l-9.5-1.3z"/></svg>
-          Get it from Microsoft Store
+        <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
+          <picture>
+            <source srcset="assets/ms-store-badge-light.svg" media="(prefers-color-scheme: dark)">
+            <img src="assets/ms-store-badge-dark.svg" width="205" height="56" alt="Download from the Microsoft Store">
+          </picture>
         </a>
-        <a class="btn btn-plain" href="https://github.com/Eranno-AS/Screzy/releases/latest/download/Screzy.exe">Download .exe</a>
       </div>
     </section>
   </main>
