@@ -35,7 +35,7 @@ A normal mouse wheel scrolls in jumps. Screzy turns each click into a smooth gli
 
 - Screzy runs in the **system tray**. Double-click the icon, or launch the app again, to open **Preferences**. Right-click it for the menu.
 - The icon turns **grey** when smoothing is switched off.
-- **Start with Windows** is in the tray menu. In the Store version, it opens Windows' own Startup settings.
+- **Start with Windows** is in the tray menu, with a check mark when it's on. In the Store version it switches Windows' own startup setting on and off. If you've turned Screzy off on Windows' Startup apps page, only you can turn it back on there, so the item opens that page instead.
 
 ### Settings
 

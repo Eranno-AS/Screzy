@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define APP_VERSION   "1.0.0"
+#define APP_VERSION   "1.0.1"
 #define APP_URL       "https://screzy.com"
 #define WM_TRAY       (WM_USER + 1)
 #define WM_SHOWPREFS  (WM_USER + 2)   /* sent by a second launch: open Preferences */
@@ -1098,6 +1098,104 @@ static int is_packaged(void) {
     return cached;
 }
 
+/* ------------------------------------------- Store start-at-sign-in (WinRT) */
+/* In the Store build the "start with Windows" switch is the package's StartupTask. MinGW has no
+   plain-C header for it, so the few calls we need go through raw COM vtables, found at run time in
+   combase.dll: no import library, no new dependency. Any failure just means "state unknown". */
+enum { SU_OFF = 0, SU_USER_OFF = 1, SU_ON = 2, SU_POLICY_OFF = 3, SU_POLICY_ON = 4 };
+#define SU_STR(s)  L##s, (UINT32)(sizeof(L##s) / sizeof(WCHAR) - 1)
+typedef HRESULT (WINAPI *PfnInit)(int);
+typedef HRESULT (WINAPI *PfnFactory)(void *, const GUID *, void **);
+typedef HRESULT (WINAPI *PfnNewStr)(const WCHAR *, UINT32, void **);
+typedef HRESULT (WINAPI *PfnFreeStr)(void *);
+typedef HRESULT (WINAPI *PfnQI)(void *, const GUID *, void **);
+typedef HRESULT (WINAPI *PfnGetPtr)(void *, void **);
+typedef HRESULT (WINAPI *PfnGetInt)(void *, int *);
+typedef HRESULT (WINAPI *PfnGetAsync)(void *, void *, void **);
+typedef HRESULT (WINAPI *PfnVoid)(void *);
+typedef ULONG (WINAPI *PfnRelease)(void *);
+/* Vtable slots: 0-2 IUnknown, 3-5 IInspectable, then the interface's own methods. */
+#define VT(p, slot, T)  ((T)(*(void ***)(p))[slot])
+
+static void su_release(void *p) { if (p) VT(p, 2, PfnRelease)(p); }
+
+/* Waits for an IAsyncOperation to leave "started" (AsyncStatus 0); true if it completed (1). */
+static int su_wait(void *op, DWORD ms) {
+    static const GUID iidAsyncInfo = { 0x36, 0, 0, { 0xC0, 0, 0, 0, 0, 0, 0, 0x46 } };
+    void *info = NULL; int st = 0; DWORD t0 = GetTickCount();
+    if (VT(op, 0, PfnQI)(op, &iidAsyncInfo, &info) < 0) return 0;
+    while (VT(info, 7, PfnGetInt)(info, &st) >= 0 && st == 0 && GetTickCount() - t0 < ms) Sleep(2);
+    su_release(info);
+    return st == 1;
+}
+
+/* The IStartupTask for ScrezyStartup, or NULL. Release it with su_release(). */
+static void *su_task(void) {
+    static const GUID iidStatics = { 0xee5b60bd, 0xa148, 0x41a7, { 0xb2, 0x6e, 0xe8, 0xb8, 0x8a, 0x1e, 0x62, 0xf8 } };
+    HMODULE cb = LoadLibraryA("combase.dll");
+    PfnInit init = cb ? (PfnInit)(void *)GetProcAddress(cb, "RoInitialize") : NULL;
+    PfnFactory factory = cb ? (PfnFactory)(void *)GetProcAddress(cb, "RoGetActivationFactory") : NULL;
+    PfnNewStr newStr = cb ? (PfnNewStr)(void *)GetProcAddress(cb, "WindowsCreateString") : NULL;
+    PfnFreeStr freeStr = cb ? (PfnFreeStr)(void *)GetProcAddress(cb, "WindowsDeleteString") : NULL;
+    void *cls = NULL, *id = NULL, *statics = NULL, *op = NULL, *task = NULL;
+    if (!init || !factory || !newStr || !freeStr) return NULL;
+    init(1);   /* RO_INIT_MULTITHREADED; if the thread is already set up another way, that works too */
+    if (newStr(SU_STR("Windows.ApplicationModel.StartupTask"), &cls) >= 0) {
+        if (factory(cls, &iidStatics, &statics) >= 0 && newStr(SU_STR("ScrezyStartup"), &id) >= 0 &&
+            VT(statics, 7, PfnGetAsync)(statics, id, &op) >= 0) {          /* IStartupTaskStatics::GetAsync */
+            if (su_wait(op, 300)) VT(op, 8, PfnGetPtr)(op, &task);          /* IAsyncOperation::GetResults */
+            su_release(op);
+        }
+        su_release(statics);
+        if (id) freeStr(id);
+        freeStr(cls);
+    }
+    return task;
+}
+
+/* SU_* state of the startup task, or -1 if it can't be read. */
+static int su_state(void) {
+    void *t = su_task(); int s = -1;
+    if (t && VT(t, 8, PfnGetInt)(t, &s) < 0) s = -1;   /* IStartupTask::get_State */
+    su_release(t);
+    return s;
+}
+
+static void open_startup_settings(void) {
+    ShellExecuteA(NULL, "open", "ms-settings:startupapps", NULL, NULL, SW_SHOW);
+}
+
+/* Off to on can make Windows ask the user, so this runs on its own thread, never the tray's. */
+static DWORD WINAPI su_toggle_thread(LPVOID unused) {
+    void *t = su_task(); int s = -1, done = 0;
+    (void)unused;
+    if (t && VT(t, 8, PfnGetInt)(t, &s) >= 0) {
+        if (s == SU_ON) done = VT(t, 7, PfnVoid)(t) >= 0;                   /* Disable */
+        else if (s == SU_OFF) {
+            void *op = NULL; int now = -1;
+            if (VT(t, 6, PfnGetPtr)(t, &op) >= 0) {                         /* RequestEnableAsync */
+                if (su_wait(op, 120000)) VT(op, 8, PfnGetInt)(op, &now);
+                su_release(op);
+                done = now >= 0;                                            /* a "no" from the user is an answer too */
+            }
+        }
+    }
+    su_release(t);
+    if (!done) open_startup_settings();
+    return 0;
+}
+
+/* The tray item. Where Windows lets the app flip the switch it does; if the user turned Screzy off in
+   Settings (or policy decides), only they can turn it back on, so show them the page. */
+static void store_startup_click(void) {
+    int s = su_state();
+    if (s == SU_ON || s == SU_OFF) {
+        HANDLE h = CreateThread(NULL, 0, su_toggle_thread, NULL, 0, NULL);
+        if (h) { CloseHandle(h); return; }
+    }
+    open_startup_settings();
+}
+
 static ULONGLONG process_start(DWORD pid) {
     FILETIME c, e, k, u; ULONGLONG t = 0;
     HANDLE h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, pid);
@@ -1311,8 +1409,11 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         AppendMenuA(m, MF_STRING | (enabled ? MF_CHECKED : 0), ID_TOGGLE, "Smooth scrolling");
         AppendMenuA(m, MF_STRING, ID_PREFS, "Preferences...");
         if (is_packaged()) {
-            /* Store install: Windows owns the startup switch (Settings > Apps > Startup). */
-            AppendMenuA(m, MF_STRING, ID_STARTUPSET, "Start with Windows...");
+            /* Store install: Windows owns the startup switch (Settings > Apps > Startup). A "..." means
+               the click opens that page because the app isn't allowed to change the switch itself. */
+            int su = su_state();
+            AppendMenuA(m, MF_STRING | (su == SU_ON || su == SU_POLICY_ON ? MF_CHECKED : 0), ID_STARTUPSET,
+                        su == SU_ON || su == SU_OFF ? "Start with Windows" : "Start with Windows...");
         } else {
             AppendMenuA(m, MF_STRING, ID_SETTINGS, "Edit .ini file...");
             AppendMenuA(m, MF_STRING, ID_RELOAD, "Reload settings");
@@ -1338,7 +1439,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         case ID_SETTINGS: ShellExecuteA(NULL, "open", "notepad.exe", iniPath, NULL, SW_SHOW); break;
         case ID_RELOAD:   load_config(); break;
         case ID_AUTOSTART: set_autostart(!autostart_on()); break;
-        case ID_STARTUPSET: ShellExecuteA(NULL, "open", "ms-settings:startupapps", NULL, NULL, SW_SHOW); break;
+        case ID_STARTUPSET: store_startup_click(); break;
         case ID_WEBSITE: ShellExecuteA(NULL, "open", APP_URL, NULL, NULL, SW_SHOW); break;
         case ID_ABOUT:
             MessageBoxA(NULL,

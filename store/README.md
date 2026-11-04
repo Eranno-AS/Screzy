@@ -31,8 +31,9 @@ This writes `store\out\Screzy_1.0.0.0_x64.msix`. The Store signs the package its
 
 Screzy then appears in the Start menu as a packaged app. Check these:
 
-- **Start with Windows…** in the tray menu opens Windows' Startup settings.
-- Screzy is listed there and switched on.
+- **Start with Windows** in the tray menu is checked, and clicking it switches it off and on.
+- Screzy is listed in Windows' Startup apps settings, matching the check mark.
+- After you switch Screzy off on that Settings page, the tray item reads **Start with Windows…** and clicking it opens the page.
 - Settings save between runs.
 
 Remove the test install with `Get-AppxPackage *Screzy* | Remove-AppxPackage`.
@@ -112,4 +113,4 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 
 **Notes for certification:**
 
-> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Flick the wheel quickly to see it coast, and click to stop it. The click that stops a coast is intentionally not passed to the window underneath. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, opens Windows Startup settings, and exits the app. Note: touchpads and precision/high-resolution wheels are intentionally passed through unchanged. Testing requires a mouse with a standard notched scroll wheel.
+> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Flick the wheel quickly to see it coast, and click to stop it. The click that stops a coast is intentionally not passed to the window underneath. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, turns "Start with Windows" on and off (it shows the current state with a check mark, and opens Windows Startup settings if the user has switched it off there), and exits the app. Note: touchpads and precision/high-resolution wheels are intentionally passed through unchanged. Testing requires a mouse with a standard notched scroll wheel.

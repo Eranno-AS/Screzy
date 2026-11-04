@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 — 2026
+
+- **Store version:** *Start with Windows* in the tray menu now shows a check mark when it's on, and clicking it switches it on or off. If you've turned Screzy off on Windows' Startup apps page, the item reads *Start with Windows…* and opens that page, because only you can turn it back on there.
+
 ## 1.0.0 — 2026
 
 First public release, published by Eranno AS. (Called *GlideScroll* during development; Screzy carries over its settings on first start.)
