@@ -1,6 +1,6 @@
 # Screzy Privacy Statement
 
-*Effective 3 November 2026. Publisher: Eranno AS, Norway.*
+*Effective 4 November 2026. Publisher: Eranno AS, Norway.*
 
 **In short: Screzy collects nothing, sends nothing and connects to nothing.**
 
@@ -32,8 +32,14 @@ The file holds your slider values and any per-app rules you add, which are progr
 
 - Screzy makes **no network connections**.
 - It has **no** analytics, telemetry, crash reporting, advertising or user accounts.
-- The **Website** menu item opens screzy.com in your browser. Nothing happens unless you choose it, and from then on the website's own policy applies.
+- The **Website** menu item opens screzy.com in your browser. Nothing happens unless you choose it. What applies there is described under *This website* below.
 - If you install Screzy from the Microsoft Store, Microsoft handles the download and updates under its own privacy terms. Eranno AS gets no personal information from that.
+
+## This website
+
+screzy.com is a plain static site. It sets no cookies and has no analytics, tracking, ads or forms. Its fonts and images come from the site itself, not from other services.
+
+The site is hosted by Cloudflare, which handles standard connection data such as your IP address to deliver and protect the site, under [Cloudflare's own privacy terms](https://www.cloudflare.com/privacypolicy/). Eranno AS doesn't use that data to identify or follow visitors. Links to GitHub and the Microsoft Store lead to sites with their own privacy terms.
 
 ## Children
 
@@ -43,4 +49,4 @@ Screzy collects no data from anyone, including children.
 
 If this statement changes, the new version will be published at screzy.com/privacy and in the Screzy source repository, with a new effective date.
 
-Questions? Contact Eranno AS through screzy.com, or open an issue in the Screzy repository on GitHub.
+Questions? Email Eranno AS at <info@screzy.com>, or open an issue in the Screzy repository on GitHub.

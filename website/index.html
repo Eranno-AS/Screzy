@@ -67,9 +67,7 @@ img { max-width: 100%; height: auto; }
 .top { display: flex; justify-content: space-between; align-items: center; padding-block: 22px; }
 .top a { color: var(--ink); text-decoration: none; }
 .top .brand { font-weight: 700; letter-spacing: -.01em; }
-.top nav { display: flex; gap: 22px; font-size: .95rem; }
-.top nav a { color: var(--muted); }
-.top nav a:hover { color: var(--ink); }
+.top .version { font-weight: 500; color: var(--muted); }
 
 /* ---------- hero */
 .hero {
@@ -174,7 +172,7 @@ h3 { font-size: 1.22rem; line-height: 1.3; letter-spacing: -.01em; margin: 18px 
 .pair p { color: var(--muted); max-width: 48ch; }
 
 footer { border-top: 1px solid var(--rule); padding-block: 32px 48px; color: var(--muted); font-size: .92rem; display: flex; flex-wrap: wrap; gap: 8px 28px; justify-content: space-between; }
-footer nav { display: flex; gap: 22px; }
+footer nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
 footer a { color: var(--muted); }
 
 @media (max-width: 900px) {
@@ -186,7 +184,6 @@ footer a { color: var(--muted); }
 }
 @media (max-width: 520px) {
   .wrap { padding: 0 16px; }
-  .top nav { gap: 16px; }
   .lead { font-size: 1.15rem; }
   .btn { width: 100%; justify-content: center; }
   .demo-bar { flex-wrap: wrap; }
@@ -197,11 +194,7 @@ footer a { color: var(--muted); }
 <body>
 <div class="wrap">
   <header class="top">
-    <span class="brand">Eranno AS</span>
-    <nav aria-label="Screzy">
-      <a href="privacy/">Privacy</a>
-      <a href="https://github.com/Eranno-AS/Screzy">Source code</a>
-    </nav>
+    <a class="brand" href="./">Screzy <span class="version">v1.0.0</span></a>
   </header>
 
   <main>
@@ -236,7 +229,7 @@ footer a { color: var(--muted); }
           </div>
           <div class="pane" id="pane" tabindex="0" aria-label="Scrollable demo document"></div>
         </div>
-        <figcaption>Scroll inside the box. Flick the wheel fast to coast, roll it again to speed up or slow down, and click to stop. Works best with a notched mouse wheel; touchpads already scroll smoothly.</figcaption>
+        <figcaption>Scroll inside the box. Flick the wheel fast to coast, roll it again to speed up or slow down, and click to stop. The demo needs a PC with a notched mouse wheel. On a phone or touchpad, the box just scrolls as usual.</figcaption>
       </figure>
     </section>
 
@@ -248,9 +241,9 @@ footer a { color: var(--muted); }
         <div>
           <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed over time: three instant spikes for a normal wheel, three smooth humps with Screzy">
             <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
-            <path class="ghost" d="{{JUMP}}"/>
-            <path class="fill" d="{{GLIDE}} L240,82 L0,82 Z"/>
-            <path class="curve" d="{{GLIDE}}"/>
+            <path class="ghost" d="M10.7,82 L10.7,10 M69.3,82 L69.3,10 M128.0,82 L128.0,10"/>
+            <path class="fill" d="M0,82.0 L2,82.0 L4,82.0 L6,82.0 L8,82.0 L10,82.0 L12,71.1 L14,57.7 L16,49.1 L18,42.3 L20,38.4 L22,35.8 L24,34.8 L26,34.7 L28,35.5 L30,36.9 L32,38.5 L34,40.7 L36,42.8 L38,45.3 L40,47.6 L42,50.1 L44,52.3 L46,54.7 L48,56.7 L50,58.9 L52,60.7 L54,62.6 L56,64.2 L58,65.9 L60,67.3 L62,68.7 L64,69.9 L66,71.1 L68,72.1 L70,66.3 L72,54.1 L74,44.0 L76,37.9 L78,33.5 L80,31.2 L82,30.2 L84,30.3 L86,31.4 L88,32.8 L90,35.0 L92,37.1 L94,39.8 L96,42.2 L98,44.9 L100,47.4 L102,50.1 L104,52.4 L106,54.9 L108,56.9 L110,59.2 L112,61.0 L114,63.0 L116,64.6 L118,66.3 L120,67.6 L122,68.9 L124,70.2 L126,71.3 L128,72.4 L130,58.6 L132,47.1 L134,40.0 L136,34.6 L138,31.8 L140,30.3 L142,30.0 L144,30.7 L146,32.0 L148,34.0 L150,36.1 L152,38.7 L154,41.0 L156,43.8 L158,46.3 L160,49.0 L162,51.3 L164,53.9 L166,56.0 L168,58.3 L170,60.2 L172,62.2 L174,63.9 L176,65.6 L178,67.0 L180,68.5 L182,69.7 L184,71.0 L186,72.0 L188,73.0 L190,73.8 L192,74.7 L194,75.4 L196,76.1 L198,76.6 L200,77.2 L202,77.7 L204,78.1 L206,78.5 L208,78.9 L210,79.2 L212,79.5 L214,79.8 L216,80.0 L218,80.2 L220,80.4 L222,80.6 L224,80.7 L226,80.9 L228,81.0 L230,81.1 L232,81.2 L234,81.3 L236,81.4 L238,81.4 L240,81.5 L240,82 L0,82 Z"/>
+            <path class="curve" d="M0,82.0 L2,82.0 L4,82.0 L6,82.0 L8,82.0 L10,82.0 L12,71.1 L14,57.7 L16,49.1 L18,42.3 L20,38.4 L22,35.8 L24,34.8 L26,34.7 L28,35.5 L30,36.9 L32,38.5 L34,40.7 L36,42.8 L38,45.3 L40,47.6 L42,50.1 L44,52.3 L46,54.7 L48,56.7 L50,58.9 L52,60.7 L54,62.6 L56,64.2 L58,65.9 L60,67.3 L62,68.7 L64,69.9 L66,71.1 L68,72.1 L70,66.3 L72,54.1 L74,44.0 L76,37.9 L78,33.5 L80,31.2 L82,30.2 L84,30.3 L86,31.4 L88,32.8 L90,35.0 L92,37.1 L94,39.8 L96,42.2 L98,44.9 L100,47.4 L102,50.1 L104,52.4 L106,54.9 L108,56.9 L110,59.2 L112,61.0 L114,63.0 L116,64.6 L118,66.3 L120,67.6 L122,68.9 L124,70.2 L126,71.3 L128,72.4 L130,58.6 L132,47.1 L134,40.0 L136,34.6 L138,31.8 L140,30.3 L142,30.0 L144,30.7 L146,32.0 L148,34.0 L150,36.1 L152,38.7 L154,41.0 L156,43.8 L158,46.3 L160,49.0 L162,51.3 L164,53.9 L166,56.0 L168,58.3 L170,60.2 L172,62.2 L174,63.9 L176,65.6 L178,67.0 L180,68.5 L182,69.7 L184,71.0 L186,72.0 L188,73.0 L190,73.8 L192,74.7 L194,75.4 L196,76.1 L198,76.6 L200,77.2 L202,77.7 L204,78.1 L206,78.5 L208,78.9 L210,79.2 L212,79.5 L214,79.8 L216,80.0 L218,80.2 L220,80.4 L222,80.6 L224,80.7 L226,80.9 L228,81.0 L230,81.1 L232,81.2 L234,81.3 L236,81.4 L238,81.4 L240,81.5"/>
             <text x="0" y="96">three wheel clicks</text>
           </svg>
           <h3>Each click glides</h3>
@@ -259,8 +252,8 @@ footer a { color: var(--muted); }
         <div>
           <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed rising as the wheel is spun faster">
             <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
-            <path class="fill" d="{{ACCEL}} L240,82 L0,82 Z"/>
-            <path class="curve" d="{{ACCEL}}"/>
+            <path class="fill" d="M0,82.0 L2,82.0 L4,82.0 L6,77.6 L8,72.2 L10,70.5 L12,70.8 L14,71.9 L16,73.4 L18,74.8 L20,76.2 L22,77.4 L24,78.4 L26,79.2 L28,79.9 L30,80.4 L32,80.8 L34,81.1 L36,80.2 L38,73.0 L40,70.5 L42,70.3 L44,71.2 L46,72.7 L48,74.2 L50,75.7 L52,76.9 L54,78.0 L56,78.9 L58,79.6 L60,80.2 L62,73.7 L64,70.2 L66,69.7 L68,70.5 L70,71.9 L72,73.6 L74,75.1 L76,76.5 L78,77.6 L80,77.5 L82,71.1 L84,68.9 L86,69.0 L88,70.3 L90,72.0 L92,73.7 L94,75.3 L96,72.1 L98,67.0 L100,65.9 L102,66.9 L104,68.7 L106,70.8 L108,69.3 L110,62.7 L112,61.3 L114,62.6 L116,64.9 L118,65.1 L120,57.1 L122,55.6 L124,57.3 L126,60.2 L128,51.9 L130,48.8 L132,50.3 L134,53.7 L136,43.6 L138,41.8 L140,44.6 L142,42.0 L144,35.4 L146,36.5 L148,40.0 L150,29.4 L152,29.1 L154,33.9 L156,22.9 L158,22.7 L160,27.9 L162,19.0 L164,18.6 L166,24.2 L168,16.7 L170,15.9 L172,21.5 L174,15.3 L176,14.2 L178,19.9 L180,14.7 L182,13.3 L184,19.0 L186,15.0 L188,12.8 L190,17.9 L192,15.2 L194,12.4 L196,17.4 L198,16.1 L200,12.2 L202,16.6 L204,16.6 L206,12.0 L208,16.2 L210,24.4 L212,33.3 L214,42.3 L216,50.0 L218,56.9 L220,62.3 L222,66.9 L224,70.3 L226,73.2 L228,75.2 L230,76.9 L232,78.2 L234,79.1 L236,79.9 L238,80.4 L240,80.8 L240,82 L0,82 Z"/>
+            <path class="curve" d="M0,82.0 L2,82.0 L4,82.0 L6,77.6 L8,72.2 L10,70.5 L12,70.8 L14,71.9 L16,73.4 L18,74.8 L20,76.2 L22,77.4 L24,78.4 L26,79.2 L28,79.9 L30,80.4 L32,80.8 L34,81.1 L36,80.2 L38,73.0 L40,70.5 L42,70.3 L44,71.2 L46,72.7 L48,74.2 L50,75.7 L52,76.9 L54,78.0 L56,78.9 L58,79.6 L60,80.2 L62,73.7 L64,70.2 L66,69.7 L68,70.5 L70,71.9 L72,73.6 L74,75.1 L76,76.5 L78,77.6 L80,77.5 L82,71.1 L84,68.9 L86,69.0 L88,70.3 L90,72.0 L92,73.7 L94,75.3 L96,72.1 L98,67.0 L100,65.9 L102,66.9 L104,68.7 L106,70.8 L108,69.3 L110,62.7 L112,61.3 L114,62.6 L116,64.9 L118,65.1 L120,57.1 L122,55.6 L124,57.3 L126,60.2 L128,51.9 L130,48.8 L132,50.3 L134,53.7 L136,43.6 L138,41.8 L140,44.6 L142,42.0 L144,35.4 L146,36.5 L148,40.0 L150,29.4 L152,29.1 L154,33.9 L156,22.9 L158,22.7 L160,27.9 L162,19.0 L164,18.6 L166,24.2 L168,16.7 L170,15.9 L172,21.5 L174,15.3 L176,14.2 L178,19.9 L180,14.7 L182,13.3 L184,19.0 L186,15.0 L188,12.8 L190,17.9 L192,15.2 L194,12.4 L196,17.4 L198,16.1 L200,12.2 L202,16.6 L204,16.6 L206,12.0 L208,16.2 L210,24.4 L212,33.3 L214,42.3 L216,50.0 L218,56.9 L220,62.3 L222,66.9 L224,70.3 L226,73.2 L228,75.2 L230,76.9 L232,78.2 L234,79.1 L236,79.9 L238,80.4 L240,80.8"/>
             <text x="0" y="96">spinning the wheel faster</text>
           </svg>
           <h3>Spin faster, go further</h3>
@@ -269,8 +262,8 @@ footer a { color: var(--muted); }
         <div>
           <svg class="chart" viewBox="0 0 240 96" role="img" aria-label="Speed after a flick, slowly decaying over a few seconds">
             <line class="axis" x1="0" y1="82" x2="240" y2="82"/>
-            <path class="fill" d="{{COAST}} L240,82 L0,82 Z"/>
-            <path class="curve" d="{{COAST}}"/>
+            <path class="fill" d="M0,82.0 L2,82.0 L4,71.9 L6,58.9 L8,42.0 L10,38.8 L12,25.0 L14,20.2 L16,18.1 L18,12.2 L20,17.9 L22,18.0 L24,18.3 L26,19.1 L28,20.2 L30,21.6 L32,23.0 L34,24.6 L36,26.1 L38,27.7 L40,29.2 L42,30.8 L44,32.3 L46,33.7 L48,35.1 L50,36.5 L52,37.9 L54,39.2 L56,40.4 L58,41.6 L60,42.8 L62,44.0 L64,45.1 L66,46.2 L68,47.3 L70,48.3 L72,49.3 L74,50.3 L76,51.2 L78,52.1 L80,53.0 L82,53.8 L84,54.7 L86,55.5 L88,56.3 L90,57.0 L92,57.8 L94,58.5 L96,59.2 L98,59.9 L100,60.5 L102,61.1 L104,61.8 L106,62.4 L108,62.9 L110,63.5 L112,64.0 L114,64.6 L116,65.1 L118,65.6 L120,66.1 L122,66.5 L124,67.0 L126,67.4 L128,67.9 L130,68.3 L132,68.7 L134,69.1 L136,69.5 L138,69.8 L140,70.2 L142,70.6 L144,70.9 L146,71.2 L148,71.5 L150,71.8 L152,72.1 L154,72.4 L156,72.7 L158,73.0 L160,73.3 L162,73.5 L164,73.8 L166,74.0 L168,74.2 L170,74.5 L172,74.7 L174,74.9 L176,75.1 L178,75.3 L180,75.5 L182,75.7 L184,75.9 L186,76.1 L188,76.3 L190,76.4 L192,76.6 L194,76.8 L196,76.9 L198,77.1 L200,77.2 L202,77.3 L204,77.5 L206,77.6 L208,77.7 L210,77.9 L212,78.0 L214,78.1 L216,78.2 L218,78.3 L220,78.4 L222,78.6 L224,78.7 L226,78.8 L228,78.8 L230,78.9 L232,79.0 L234,79.1 L236,79.2 L238,79.3 L240,79.4 L240,82 L0,82 Z"/>
+            <path class="curve" d="M0,82.0 L2,82.0 L4,71.9 L6,58.9 L8,42.0 L10,38.8 L12,25.0 L14,20.2 L16,18.1 L18,12.2 L20,17.9 L22,18.0 L24,18.3 L26,19.1 L28,20.2 L30,21.6 L32,23.0 L34,24.6 L36,26.1 L38,27.7 L40,29.2 L42,30.8 L44,32.3 L46,33.7 L48,35.1 L50,36.5 L52,37.9 L54,39.2 L56,40.4 L58,41.6 L60,42.8 L62,44.0 L64,45.1 L66,46.2 L68,47.3 L70,48.3 L72,49.3 L74,50.3 L76,51.2 L78,52.1 L80,53.0 L82,53.8 L84,54.7 L86,55.5 L88,56.3 L90,57.0 L92,57.8 L94,58.5 L96,59.2 L98,59.9 L100,60.5 L102,61.1 L104,61.8 L106,62.4 L108,62.9 L110,63.5 L112,64.0 L114,64.6 L116,65.1 L118,65.6 L120,66.1 L122,66.5 L124,67.0 L126,67.4 L128,67.9 L130,68.3 L132,68.7 L134,69.1 L136,69.5 L138,69.8 L140,70.2 L142,70.6 L144,70.9 L146,71.2 L148,71.5 L150,71.8 L152,72.1 L154,72.4 L156,72.7 L158,73.0 L160,73.3 L162,73.5 L164,73.8 L166,74.0 L168,74.2 L170,74.5 L172,74.7 L174,74.9 L176,75.1 L178,75.3 L180,75.5 L182,75.7 L184,75.9 L186,76.1 L188,76.3 L190,76.4 L192,76.6 L194,76.8 L196,76.9 L198,77.1 L200,77.2 L202,77.3 L204,77.5 L206,77.6 L208,77.7 L210,77.9 L212,78.0 L214,78.1 L216,78.2 L218,78.3 L220,78.4 L222,78.6 L224,78.7 L226,78.8 L228,78.8 L230,78.9 L232,79.0 L234,79.1 L236,79.2 L238,79.3 L240,79.4"/>
             <text x="0" y="96">a quick flick, then hands off</text>
           </svg>
           <h3>Flick, and it coasts</h3>
@@ -283,8 +276,10 @@ footer a { color: var(--muted); }
         <li>Touchpads, Ctrl + wheel zoom and sideways scrolling are left alone</li>
         <li>Uses no CPU while you're not scrolling</li>
         <li>Lives in the tray; the icon turns grey when smoothing is off</li>
-        <li>RollerMouse friendly: steer a coast's speed with the rollerbar</li>
+        <li>Steer a coast's speed by moving the mouse up or down, or with a RollerMouse rollerbar</li>
         <li>Set a top speed for coasts, or let them run until you click</li>
+        <li>Optional Ready shortcut, Alt + middle click or Alt + G: the wheel or rollerbar then starts a coast without a flick</li>
+        <li>A small badge by the pointer shows a coast's direction, or that it's standing still</li>
       </ul>
     </section>
 
@@ -322,8 +317,9 @@ footer a { color: var(--muted); }
   </main>
 
   <footer>
-    <span>© 2026 Eranno AS, Norway</span>
+    <span>© 2026 <a href="https://eranno.com">Eranno AS</a>, Norway</span>
     <nav aria-label="Footer">
+      <a href="mailto:info@screzy.com">info@screzy.com</a>
       <a href="privacy/">Privacy</a>
       <a href="https://github.com/Eranno-AS/Screzy">GitHub</a>
       <a href="https://github.com/Eranno-AS/Screzy/blob/main/LICENSE">MIT License</a>
@@ -351,6 +347,8 @@ footer a { color: var(--muted); }
 
   /* ---- the same motion model as the app: spring glide, acceleration, coasting ---- */
   const DURATION = 0.26, W = 4.74 / DURATION, MAXV = 4000;   // px/s, about 120 lines/s
+  const STEP = 100;                                // px per wheel click, in both modes
+  let unit = 0, smallT = -9;                       // wheel-click size in px; last touchpad-sized step
   let mode = 'glide';
   let pos = 0, pending = 0, vel = 0, raf = 0, prevT = 0;
   let rate = 0, lastT = -9, lastDir = 0, lastRate = 0, lastClick = -9;
@@ -397,13 +395,26 @@ footer a { color: var(--muted); }
   }
 
   pane.addEventListener('wheel', e => {
-    if (e.ctrlKey || e.shiftKey || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
-    let d = e.deltaY * (e.deltaMode === 1 ? 33 : e.deltaMode === 2 ? pane.clientHeight : 1);
-    if (Math.abs(d) < 40) return;                  // touchpad / high-res wheel: leave native
+    if (e.ctrlKey || e.shiftKey) return;
+    // Spot real notched-wheel clicks, whatever Windows' lines-per-click and display scaling are.
+    // Read deltaMode first: Firefox then reports a wheel click in lines, a touchpad in pixels.
+    const dm = e.deltaMode, dy = e.deltaY;
+    if (dy === 0 || Math.abs(e.deltaX) > Math.abs(dy)) return;
+    let clicks = 1;                                // lines or pages: one wheel click
+    if (dm === 0) {
+      // Pixels (Chrome, Edge): a click is one fixed step, about 33 px per Windows line, so
+      // learn the smallest step seen. Touchpads send streams of small steps: leave those native.
+      const a = Math.abs(dy), t = performance.now() / 1000;
+      if (a < 12) { smallT = t; return; }
+      if (t - smallT < 0.3) return;
+      if (!unit || a < unit * 0.9) unit = a;
+      clicks = Math.max(1, Math.round(a / unit));
+    }
     e.preventDefault();
+    const dir = Math.sign(dy), d = dir * clicks * STEP;
     if (mode === 'jump') { stopAll(); pane.scrollTop += d; return; }
 
-    const now = performance.now() / 1000, dir = Math.sign(d), gap = now - lastT;
+    const now = performance.now() / 1000, gap = now - lastT;
     if (coasting) {                                // nudges: speed up, or slow down a step
       const sp = Math.abs(coastVel), cd = Math.sign(coastVel);
       if (dir === cd) coastVel = cd * Math.max(sp * 1.3, sp + 400);
@@ -418,7 +429,6 @@ footer a { color: var(--muted); }
       stopAll();
       if (wasCoasting) { lastDir = 0; lastT = now; rate = 0; return; }  // opposite click just stops
     }
-    const clicks = Math.max(1, Math.round(Math.abs(d) / 100));
     const inst = clicks / Math.max(gap, 0.008);
     rate = (dir !== lastDir || gap > 0.6) ? 0 : (rate ? 0.5 * rate + 0.5 * inst : inst);
     const a = Math.min(4, Math.max(1, 1 + 0.5 * (rate - 6) / 4));

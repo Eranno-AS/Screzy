@@ -10,7 +10,7 @@ description: Prepare a Screzy release (version bump, changelog, docs sync, build
 Do these, in order, and report each result:
 
 1. Ask for the new version number and the list of changes, unless the user already gave them. Use the next number: 1.0.1 for fixes, 1.1.0 for features. The Store needs the fourth part to be `0`.
-2. Bump the version everywhere: `APP_VERSION` in `src/screzy.c`, `FILEVERSION`, `PRODUCTVERSION`, `FileVersion` and `ProductVersion` in `res/screzy.rc`. Grep for the old number afterwards to catch strays.
+2. Bump the version everywhere: `APP_VERSION` in `src/screzy.c`, `FILEVERSION`, `PRODUCTVERSION`, `FileVersion` and `ProductVersion` in `res/screzy.rc`, and the header version in `website/index.html` and `website/privacy/index.html`. Grep for the old number afterwards to catch strays.
 3. Add the `CHANGELOG.md` entry in the existing tone: plain, friendly English, sentence case.
 4. Check that `README.md`, `store/README.md`, `PRIVACY.md`, `website/privacy/` and `website/index.html` still match the app, as `CLAUDE.md` invariant 5 requires. Fix what doesn't.
 5. Build with `build.cmd` (or `build.sh`). It must be warning-free.

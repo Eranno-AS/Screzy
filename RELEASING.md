@@ -24,6 +24,7 @@ Use the next number: 1.0.1 for fixes, 1.1.0 for new features. The Store's fourth
 2. **Bump the version** (all of these, to the same number):
    - `APP_VERSION` in `src/screzy.c`
    - `FILEVERSION` and `PRODUCTVERSION` (`1,0,1,0`) and the `FileVersion` and `ProductVersion` strings (`"1.0.1"`) in `res/screzy.rc`
+   - the version in the header of `website/index.html` and `website/privacy/index.html` (`v1.0.1`). It goes live when you push, so push it together with the tag
 3. **Add a `CHANGELOG.md` entry** at the top: plain, friendly English, one bullet per change.
 4. **Keep the docs in sync** (see `CLAUDE.md`, invariant 5): `README.md`, `store/README.md`, the privacy texts and `website/index.html`, wherever the change touches them.
 5. **Commit and push.** The "build" workflow must go green.

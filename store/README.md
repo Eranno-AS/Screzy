@@ -47,7 +47,7 @@ Create a submission in Partner Center and fill in these sections:
 | Section | What to enter |
 |---|---|
 | Pricing and availability | **Free**, all markets, public visibility |
-| Properties | Category **Utilities & tools**. Privacy policy URL `https://screzy.com/privacy`. Website `https://screzy.com`. Support contact: your support page or email. Product declarations: leave defaults |
+| Properties | Category **Utilities & tools**. Privacy policy URL `https://screzy.com/privacy`. Website `https://screzy.com`. Support contact: `info@screzy.com`. Product declarations: leave defaults |
 | Age ratings | Answer the IARC questionnaire: no violence, no user interaction, no data sharing, no purchases. Expect a 3+ / Everyone rating |
 | Packages | Upload `Screzy_1.0.0.0_x64.msix` |
 | Store listings (English) | Copy the text from section 4 below, and upload images from `store/listing/` plus screenshots |

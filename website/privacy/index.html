@@ -25,9 +25,8 @@ a { color: var(--blue); text-underline-offset: .18em; }
 .wrap { max-width: 720px; margin: 0 auto; padding: 0 24px; }
 .top { display: flex; justify-content: space-between; align-items: center; padding-block: 22px; }
 .top a { color: var(--ink); text-decoration: none; }
-.top .brand { font-weight: 700; }
-.top .back { display: inline-flex; align-items: center; gap: 8px; color: var(--muted); }
-.top .back img { width: 22px; height: 22px; }
+.top .brand { font-weight: 700; letter-spacing: -.01em; }
+.top .version { font-weight: 500; color: var(--muted); }
 h1 { font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.08; letter-spacing: -.035em; font-weight: 800; margin: 40px 0 8px; }
 .meta { color: var(--muted); margin: 0 0 28px; }
 .summary { font-size: 1.25rem; line-height: 1.45; font-weight: 600; padding: 20px 22px; background: var(--panel); border-left: 3px solid var(--blue); border-radius: 0 10px 10px 0; margin: 0 0 40px; }
@@ -43,12 +42,11 @@ footer a { color: var(--muted); }
 <body>
 <div class="wrap">
   <header class="top">
-    <span class="brand">Eranno AS</span>
-    <a class="back" href="../"><img src="../assets/screzy.svg" alt="">Screzy</a>
+    <a class="brand" href="../">Screzy <span class="version">v1.0.0</span></a>
   </header>
   <main>
     <h1>Screzy privacy statement</h1>
-    <p class="meta">Effective 3 November 2026. Publisher: Eranno AS, Norway.</p>
+    <p class="meta">Effective 4 November 2026. Publisher: Eranno AS, Norway.</p>
     <p class="summary">Screzy collects nothing, sends nothing and connects to nothing.</p>
 
     <h2>What Screzy does on your computer</h2>
@@ -75,18 +73,22 @@ footer a { color: var(--muted); }
     <ul>
       <li>Screzy makes <strong>no network connections</strong>.</li>
       <li>It has <strong>no</strong> analytics, telemetry, crash reporting, advertising or user accounts.</li>
-      <li>The <em>Website</em> menu item opens screzy.com in your browser. Nothing happens unless you choose it, and from then on the website's own policy applies.</li>
+      <li>The <em>Website</em> menu item opens screzy.com in your browser. Nothing happens unless you choose it. What applies there is described under <a href="#website">This website</a> below.</li>
       <li>If you install Screzy from the Microsoft Store, Microsoft handles the download and updates under its own privacy terms. Eranno AS gets no personal information from that.</li>
     </ul>
+
+    <h2 id="website">This website</h2>
+    <p>screzy.com is a plain static site. It sets no cookies and has no analytics, tracking, ads or forms. Its fonts and images come from the site itself, not from other services.</p>
+    <p>The site is hosted by Cloudflare, which handles standard connection data such as your IP address to deliver and protect the site, under <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's own privacy terms</a>. Eranno AS doesn't use that data to identify or follow visitors. Links to GitHub and the Microsoft Store lead to sites with their own privacy terms.</p>
 
     <h2>Children</h2>
     <p>Screzy collects no data from anyone, including children.</p>
 
     <h2>Changes and contact</h2>
     <p>If this statement changes, the new version will be published on this page and in the Screzy source repository, with a new effective date.</p>
-    <p>Questions? Contact Eranno AS through <a href="/">screzy.com</a>, or open an issue in the <a href="https://github.com/Eranno-AS/Screzy/issues">Screzy repository on GitHub</a>.</p>
+    <p>Questions? Email Eranno AS at <a href="mailto:info@screzy.com">info@screzy.com</a>, or open an issue in the <a href="https://github.com/Eranno-AS/Screzy/issues">Screzy repository on GitHub</a>.</p>
   </main>
-  <footer>© 2026 Eranno AS, Norway · <a href="../">Screzy</a></footer>
+  <footer>© 2026 <a href="https://eranno.com">Eranno AS</a>, Norway · <a href="../">Screzy</a> · <a href="mailto:info@screzy.com">info@screzy.com</a></footer>
 </div>
 </body>
 </html>
