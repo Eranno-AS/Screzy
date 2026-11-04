@@ -24,6 +24,7 @@ param(
   [switch] $RegisterLocally                               # register the unpacked layout for local testing
 )
 $ErrorActionPreference = "Stop"
+$IdentityName = $IdentityName.Trim(); $Publisher = $Publisher.Trim()   # a pasted trailing space makes the manifest invalid
 $root  = Split-Path -Parent $PSScriptRoot
 $store = $PSScriptRoot
 if (-not $Exe) { $Exe = Join-Path $root "build\Screzy.exe" }
