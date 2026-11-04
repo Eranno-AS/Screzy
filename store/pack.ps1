@@ -60,6 +60,7 @@ $makeappx = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\ma
 if (-not $makeappx) { throw "makeappx.exe not found. Install the Windows SDK (https://developer.microsoft.com/windows/downloads/windows-sdk/)." }
 
 $msix = Join-Path $out ("Screzy_{0}_x64.msix" -f $Version)
-& $makeappx.FullName pack /d $layout /p $msix /o
-if ($LASTEXITCODE -ne 0) { throw "makeappx failed ($LASTEXITCODE)" }
+$log = & $makeappx.FullName pack /d $layout /p $msix /o 2>&1
+$log | ForEach-Object { Write-Host $_ }
+if ($LASTEXITCODE -ne 0) { throw "makeappx failed ($LASTEXITCODE): " + (($log | Where-Object { $_ -match "error|fail|invalid|0x8" } | Select-Object -First 4) -join " | ") }
 Write-Host "Created $msix - upload it in Partner Center > Packages."
