@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define APP_VERSION   "1.0.1"
+#define APP_VERSION   "1.1.0"
 #define APP_URL       "https://screzy.com"
 #define WM_TRAY       (WM_USER + 1)
 #define WM_SHOWPREFS  (WM_USER + 2)   /* sent by a second launch: open Preferences */

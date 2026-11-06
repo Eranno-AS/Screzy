@@ -1,6 +1,6 @@
 # Screzy Privacy Statement
 
-*Effective 4 November 2026. Publisher: Eranno AS, Norway.*
+*Effective 6 November 2026. Publisher: Eranno AS, Norway.*
 
 **In short: Screzy collects nothing, sends nothing and connects to nothing.**
 

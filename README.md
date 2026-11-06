@@ -40,7 +40,7 @@ The defaults are tuned to feel good straight away. Preferences is there to fine-
 |---|---|---|
 | Scrolling | Distance per wheel click, Glide duration, Acceleration, Max acceleration | 1×, 800 ms, 1.2, 6× |
 | Coasting | Coast length, Coast speed, Clicks needed to coast, Flick speed to coast, Max coast speed | 7 s, 1× the flick, 10 clicks, 8 clicks/s, 60 lines/s |
-| Autoscroll | *A flick starts autoscroll instead of a coast*, Autoscroll starts at, Autoscroll sensitivity | Off, 10 lines/s, 1.5× |
+| Autoscroll | *A flick starts autoscroll instead of a coast*, Autoscroll starts at, Autoscroll sensitivity | Off, 10 lines/s, 1.0× |
 
 The **Try it** box lets you feel a change before you keep it. **Per-app rules:** pick an app with **Running apps…**, set **Distance ×** or tick **Disable smoothing**, then press **Add / Update** and **Apply**.
 

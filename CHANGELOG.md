@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 1.1.0 — 2026
 
 - **Simpler Preferences:** one window with three sections, Scrolling, Coasting and Autoscroll, and new defaults that feel good straight away: a longer, floatier glide and more deliberate coasting. Existing settings are kept.
 - **Softer endings:** glides and coasts now ease out to a full stop instead of stopping at a slow crawl. Fast scrolling also carries on a little after you stop, building up toward a coast.
