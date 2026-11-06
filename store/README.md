@@ -76,9 +76,9 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 >
 > Each wheel click becomes a smooth glide that eases in and out, timed to your monitor's refresh rate, so the motion stays fluid on 60, 120 and 144 Hz screens. Spin the wheel faster and it accelerates, so long pages go by quickly while slow scrolling stays precise.
 >
-> Flick the wheel and let go: the page keeps coasting and gently runs down, just like on a phone. While it coasts, steer it. Wheel clicks speed it up or slow it down. Or move the mouse, or the rollerbar on a Contour RollerMouse, away from where the coast started: the further you go, the faster it scrolls. A small indicator by the pointer shows the direction, and a click stops it.
+> Flick the wheel and let go: the page keeps coasting and gently runs down, just like on a phone. While it coasts, steer it: wheel clicks speed it up or slow it down, and a click stops it. Moved the pointer to click a tab or a button? That click works as normal. Turn on the autoscroll shortcut (Alt + middle click) and move the pointer down or up to scroll hands-free, faster the further you go. It works with the rollerbar on a Contour RollerMouse too.
 >
-> For hands-free reading, start coasts at a calm fixed pace, or let a flick wait until you steer. Fine-tune everything in one Preferences window, and give individual apps their own distance, or switch smoothing off for them, such as games.
+> For hands-free reading, start coasts at a calm fixed pace, or let a flick wait until you steer. Preferences keep it simple, with advanced settings when you want them. Give individual apps their own distance, or switch smoothing off for them, such as games.
 >
 > Screzy lives quietly in the system tray, uses no CPU while you're not scrolling, and never connects to the internet. No accounts, no ads, no tracking. It's free and open source.
 >
@@ -91,8 +91,8 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 - Steps timed to your monitor's refresh rate
 - Scroll acceleration when you spin the wheel faster
 - Flick to coast, with a click to stop
-- Steer a coast's speed with the wheel or rollerbar
-- Coast indicator by the pointer shows direction
+- Steer a coast's speed with the wheel
+- Optional autoscroll: steer with the mouse or a RollerMouse rollerbar
 - Per-app speed, or smoothing off per app
 - Adjustable distance, glide time, acceleration and coasting
 - Leaves touchpads, Ctrl+wheel zoom and admin windows alone
@@ -114,4 +114,4 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 
 **Notes for certification:**
 
-> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Flick the wheel quickly to see it coast, and click to stop it. The click that stops a coast is intentionally not passed to the window underneath. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, turns "Start with Windows" on and off (it shows the current state with a check mark, and opens Windows Startup settings if the user has switched it off there), and exits the app. Note: touchpads and precision/high-resolution wheels are intentionally passed through unchanged. Testing requires a mouse with a standard notched scroll wheel.
+> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Flick the wheel quickly to see it coast, and click to stop it. A click near where the coast started is intentionally not passed to the window underneath (it only stops the coast). A click after moving the pointer away stops the coast and goes through normally, and a coast also stops when the pointer moves to another window or another app comes to the front. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, turns "Start with Windows" on and off (it shows the current state with a check mark, and opens Windows Startup settings if the user has switched it off there), and exits the app. Note: touchpads and precision/high-resolution wheels are intentionally passed through unchanged. Testing requires a mouse with a standard notched scroll wheel.

@@ -18,9 +18,9 @@ A normal mouse wheel scrolls in jumps. Screzy turns each click into a smooth gli
 
 - **Smooth glides.** Each wheel click eases in and out instead of jumping. Steps are timed to your monitor's refresh rate (60, 120, 144 Hz…), so the motion is even.
 - **Acceleration.** Spin faster and each click goes further. Slow, careful scrolling stays precise.
-- **Flick coasting.** Flick the wheel and let go, and the page keeps gliding at that speed, then gently runs down. A left, middle or right click stops it, and only stops it: that click isn't passed on, so it can't open a link or press a button by accident.
-- **Steer a coast.** While it coasts, a wheel click in the same direction speeds it up and one the other way slows it down. Optionally, roll a RollerMouse bar (or move the mouse) up and down to steer its speed and direction smoothly. Once you steer, the coast holds that speed, which makes a hands-free reading scroll.
-- **Coast indicator.** While a page coasts, a small badge beside the pointer shows its direction, or that it's ready but standing still.
+- **Flick coasting.** Flick the wheel and let go, and the page keeps gliding at that speed, then gently runs down. A left, middle or right click where you were scrolling stops it, and only stops it: that click isn't passed on, so it can't open a link or press a button by accident. If you've moved the pointer away first, say to a tab or a button, the click stops the coast and still goes through. A coast also stops when the pointer moves onto another window or you switch apps.
+- **Steer a coast.** While it coasts, a wheel click in the same direction speeds it up and one the other way slows it down. Once you steer, the coast holds that speed, which makes a hands-free reading scroll.
+- **Autoscroll (optional).** Alt + middle click starts autoscroll at the pointer, like middle-click autoscroll in a browser: move the pointer down or up to scroll, further to go faster. A small badge marks the start point.
 - **Per-app rules.** Give an app its own scroll distance, or turn smoothing off for it (handy for games). Pick from a list of running apps.
 - **Stays out of the way.** Touchpads and high-resolution wheels, Ctrl + wheel zoom, sideways scrolling and windows running as administrator are left alone.
 - **Lightweight.** A single small `.exe` that uses no CPU while you're not scrolling. No network access, no telemetry ([privacy statement](PRIVACY.md)).
@@ -39,36 +39,53 @@ A normal mouse wheel scrolls in jumps. Screzy turns each click into a smooth gli
 
 ### Settings
 
+Preferences opens with the basic settings. **Show advanced** adds the rest, and Screzy remembers which view you used last.
+
 | Setting | What it does | Default |
 |---|---|---|
 | Distance per wheel click | How far one click scrolls, shown in lines | 1× your Windows setting |
-| Glide duration | How long each glide lasts. Longer feels floatier, shorter feels snappier | 260 ms |
-| Acceleration | How much faster scrolling gets as you spin quicker | 0.5 |
-| Max acceleration | Upper limit for acceleration | 4× |
-| Acceleration starts at | Wheel speed where acceleration begins | 6 clicks/s |
-| Flick coasting | How long a flick keeps gliding: Off, 0.5–10 s, or *Until stopped* | 3 s |
-| Coast starting speed | *As flicked* keeps going at the speed you flicked. *Wait (ready)* makes a flick stop the page and wait: the wheel or rollerbar then starts it. A fixed value (1–100 lines/s, in fine steps at the slow end) eases the coast down to that pace | As flicked |
-| Flick speed to coast | How fast you must spin to trigger coasting | 15 clicks/s |
-| Clicks needed to coast | How many fast clicks in a row a flick needs. Raise it if coasts start when you don't want them | 4 clicks |
-| Max coast speed | Upper limit for coasting speed, or *No limit* | 120 lines/s |
-| Steering sensitivity | How strongly pointer movement changes a coast's speed, in both steering styles | 1.0× |
-| Steer coasts with mouse / rollerbar | *Push*: rolling up or down changes the coast's speed while the pointer stays put. *Distance from start*: the pointer moves freely and the speed follows how far it is above or below where the coast started (see below) | Off |
-| Keep steered coasts until I click | A coast you've steered never ends by itself, even at a standstill, so you can roll slowly through zero to change direction. Only a mouse click ends it | On |
-| Opposite wheel click stops a coast | Stop instantly instead of slowing down a step | Off |
-| Show coast indicator by the pointer | A small badge beside the pointer while a coast runs: dot and both arrows when it's at a standstill, dot and an arrow for the direction it's moving | On |
-| Ready shortcut | *Alt + middle click* or *Alt + G* puts Screzy straight into Ready at the pointer, with nothing scrolled. The wheel or rollerbar then starts the coast and a click ends it. *Alt + G* is unavailable to other apps while Screzy runs | Off |
+| Glide duration | How long each glide lasts, 50–1200 ms. Longer feels floatier, shorter feels snappier | 800 ms |
+| Acceleration | How much faster scrolling gets as you spin quicker | 1.2 |
+| Coast length | How long a flick keeps gliding: Off, 0.5–10 s, or *Until stopped* | 7 s |
+| Clicks needed to coast | How many fast clicks in a row a flick needs. Raise it if coasts start when you don't want them | 10 clicks |
+
+**Advanced**
+
+| Setting | What it does | Default |
+|---|---|---|
+| Max acceleration | Upper limit for acceleration | 6× |
+| Acceleration starts at | Wheel speed where acceleration begins | 5 clicks/s |
+| Flick speed to coast | How fast you must spin to trigger coasting | 8 clicks/s |
+| Max coast speed | Upper limit for coasting speed, or *No limit* | 60 lines/s |
+| Coast starts | *As flicked*: a coast keeps going at the speed you flicked, so a harder flick coasts faster. *Fixed pace*: every coast eases to one set speed. *Wait (ready)*: a flick stops the page and waits, and a wheel click then starts it | As flicked |
+| Coast speed | With *As flicked*: 0.25–2× the flick's speed, so you can make coasts calmer or livelier and still keep the feel of the flick. With *Fixed pace*: 1–100 lines/s, in fine steps at the slow end | 1× the flick |
+| Autoscroll sensitivity | How far you move the pointer in autoscroll to reach full speed. Higher means a shorter distance | 1.5× |
+| Autoscroll shortcut | *Alt + middle click* or *Alt + G* starts autoscroll at the pointer (see below). *Alt + G* is unavailable to other apps while Screzy runs | Off |
+
+Not in Preferences, but available in `screzy.ini`:
+
+- `opposite_click_stops_coast=1`: one opposite wheel click stops a coast instead of slowing it down a step.
+- `show_coast_indicator=1`: show the indicator badge beside the pointer for every coast, not just in autoscroll and Ready.
 
 ### Steering a coast
 
-Flick the wheel to start a coast, then adjust it while it's moving:
+Flick the wheel to start a coast, then adjust it with the wheel while it's moving:
 
-- **Wheel:** each click in the coast's direction speeds it up a step. Each click the other way slows it down a step, and a slow coast stops.
-- **Pointer (optional),** with two styles:
-  - *Distance from start*, like a browser's middle-click autoscroll: the indicator stays where the coast began. Move the pointer below it to scroll down, above it to scroll up, further away to go faster, and back onto it to stand still. Your whole speed range is spread over the distance: about 1 line/s just outside the start, rising steadily to your *Max coast speed* about 280 px away. *Steering sensitivity* makes that distance shorter or longer.
-  - *Push*: the pointer stays at the same height, and each roll up or down adds to or takes from the speed. A small dead zone ignores accidental touches.
-- **Start slow:** set *Coast starting speed* to a calm reading pace. Try 2–5 lines/s for slow, hands-free reading, or 15–30 lines/s for skimming. A flick then just starts the scroll in that direction at that pace, ready to steer. For a coast that keeps going until you click, also set *Flick coasting* to *Until stopped*.
-- **Start without moving the page:** set *Coast starting speed* to *Wait (ready)*. A flick then brings the page to a stop and shows the Ready indicator, and the first deliberate wheel click or rollerbar roll sets it moving. Late clicks from the flick itself are ignored. The page moves a little during the flick, because Screzy can only recognise a flick after a few clicks. For no movement at all, use the *Ready shortcut* instead. With a RollerMouse, you can map one of its buttons to *Alt + G* in the Contour software.
-- **Any steering holds the speed.** The coast stops running down, so you can read at a steady pace. A left, middle or right click stops it. With *Keep steered coasts until I click* on (the default), a steered coast never ends by itself, even at a standstill, so you can roll slowly through zero to reverse. Turn it off, and a steered coast left at a standstill ends after a second.
+- **Same direction:** each click speeds it up a step.
+- **Other direction:** each click slows it down a step, and a slow coast stops.
+- **Any steering holds the speed.** The coast stops running down, so you can read at a steady pace. A click stops it.
+- **Start slow:** set *Coast starts* to *Fixed pace* and *Coast speed* to a calm reading pace. Try 2–5 lines/s for slow, hands-free reading, or 15–30 lines/s for skimming. A flick then just starts the scroll in that direction at that pace. For a coast that keeps going until you click, also set *Coast length* to *Until stopped*.
+- **Start without moving the page:** set *Coast starts* to *Wait (ready)*. A flick then brings the page to a stop and shows the Ready indicator, and the first deliberate wheel click sets it moving. Late clicks from the flick itself are ignored.
+
+### Autoscroll
+
+Turn on the *Autoscroll shortcut* in Advanced, then press **Alt + middle click** (or **Alt + G**) over a page:
+
+- A small badge marks the start point, and nothing scrolls yet.
+- Move the pointer below the badge to scroll down, above it to scroll up, and further away to go faster. Your whole speed range is spread over the distance: about 1 line/s just outside the start, rising to your *Max coast speed* about 280 px away. *Autoscroll sensitivity* makes that distance shorter or longer.
+- Move back onto the badge to stand still. Autoscroll keeps going until you click.
+- A wheel click also starts or nudges it.
+- With a RollerMouse, rolling the bar moves the pointer, so it steers autoscroll too. You can map one of its buttons to *Alt + G* in the Contour software.
 
 ### Per-app rules
 
@@ -94,7 +111,7 @@ Apps multiply every scroll step by Windows' own **lines per click** setting. The
 
 ## How it works
 
-Screzy installs a low-level mouse hook on its own highest-priority thread, so the pointer never waits on the rest of the app. Ordinary pointer movement leaves the hook immediately. Each real wheel click (a multiple of 120 units) is swallowed and added to a target distance. An animation thread then moves toward that target with a critically damped spring, sending small wheel steps with `SendInput`, one per display frame, locked to the monitor's refresh rate. A minimum step size keeps the end of each glide even. Acceleration comes from the smoothed rate of wheel clicks. A flick hands its current speed to a coast that decays exponentially, unless the user steers it with wheel clicks or vertical pointer movement, which then sets and holds the coast's speed. Everything is plain C and Win32 with no dependencies; see [`src/screzy.c`](src/screzy.c).
+Screzy installs a low-level mouse hook on its own highest-priority thread, so the pointer never waits on the rest of the app. Ordinary pointer movement leaves the hook immediately. Each real wheel click (a multiple of 120 units) is swallowed and added to a target distance. An animation thread then moves toward that target with a critically damped spring, sending small wheel steps with `SendInput`, one per display frame, locked to the monitor's refresh rate. A minimum step size keeps the end of each glide even. Acceleration comes from the smoothed rate of wheel clicks. A flick hands its current speed to a coast that decays exponentially, unless the user steers it with wheel clicks, which then set and hold the coast's speed. In autoscroll (the shortcut), the pointer's distance from the start point sets the speed instead. Everything is plain C and Win32 with no dependencies; see [`src/screzy.c`](src/screzy.c).
 
 ## Building
 
