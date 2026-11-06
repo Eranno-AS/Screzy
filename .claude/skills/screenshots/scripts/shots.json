@@ -1,0 +1,30 @@
+{
+  "_note": "Captions for the Store screenshots. Check them against README.md before every run: they must describe what the app does now.",
+  "shots": [
+    {
+      "file": "screenshot-1-coast.png",
+      "kind": "coast",
+      "headline": ["Flick to coast.", "Click to stop."],
+      "body": "Flick the wheel and the page keeps gliding. Roll again to speed up or slow down. A click stops it.",
+      "legend": ["Coasting down", "shown by the pointer"]
+    },
+    {
+      "file": "screenshot-2-preferences.png",
+      "kind": "prefs",
+      "headline": ["Make it yours."],
+      "body": "Set the distance, glide and acceleration, and how coasting feels. Give any app its own speed, or turn smoothing off for it."
+    },
+    {
+      "file": "screenshot-3-tray.png",
+      "kind": "tray",
+      "headline": ["Quietly in the tray."],
+      "body": "Screzy runs in the background and smooths the wheel in every app. Switch it off and on, or open Preferences, from the tray icon."
+    },
+    {
+      "file": "screenshot-4-per-app.png",
+      "kind": "picker",
+      "headline": ["Rules for each app."],
+      "body": "Pick from the apps that are running, then give one its own scroll distance, or turn smoothing off for it, such as a game."
+    }
+  ]
+}
