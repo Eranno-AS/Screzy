@@ -54,11 +54,11 @@ Create a submission in Partner Center and fill in these sections:
 | Submission options → Restricted capabilities | Paste the `runFullTrust` justification below |
 | Notes for certification | Paste the testing notes below |
 
-**Screenshots.** At least one is required, as a PNG of 1366×768 or larger, taken on real Windows. Good choices:
+**Screenshots.** At least one is required, as a PNG of 1366×768 or larger, taken on real Windows. The current set is in `store/listing/`, in this order:
 
-1. The Preferences window over a web page.
-2. The tray menu open.
-3. A per-app rule being added with **Running apps…**.
+1. `screenshot-1-coast.png`: a coast running, with the indicator by the pointer.
+2. `screenshot-2-preferences.png`: the Preferences window over a document.
+3. `screenshot-3-tray.png`: the tray menu open.
 
 ## 4. Listing text
 
@@ -83,7 +83,7 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 >
 > Tip: for the smoothest result, set Windows' "Lines to scroll at a time" to 1 (Settings → Bluetooth & devices → Mouse), or 3 if you prefer, then adjust the distance in Screzy.
 
-**What's new in this version:** First release.
+**What's new in this version:** *Start with Windows* in the tray menu now shows a check mark and switches startup on and off. Changes made to the settings file in a text editor are picked up without restarting Screzy.
 
 **Product features:**
 - Smooth, eased scrolling for every app
