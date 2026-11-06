@@ -76,9 +76,9 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 >
 > Each wheel click becomes a smooth glide that eases in and out, timed to your monitor's refresh rate, so the motion stays fluid on 60, 120 and 144 Hz screens. Spin the wheel faster and it accelerates, so long pages go by quickly while slow scrolling stays precise.
 >
-> Flick the wheel and let go: the page keeps coasting and gently runs down, just like on a phone. While it coasts, steer it: wheel clicks speed it up or slow it down, and a click stops it. Moved the pointer to click a tab or a button? That click works as normal. Turn on the autoscroll shortcut (Alt + middle click) and move the pointer down or up to scroll hands-free, faster the further you go. It works with the rollerbar on a Contour RollerMouse too.
+> Flick the wheel and let go: the page keeps coasting and gently runs down, just like on a phone. While it coasts, steer it: wheel clicks speed it up or slow it down, and a click stops it. Moved the pointer to click a tab or a button? That click works as normal. Or switch a flick to autoscroll and move the pointer down or up to scroll hands-free, faster the further you go. It works with the rollerbar on a Contour RollerMouse too.
 >
-> For hands-free reading, start coasts at a calm fixed pace, or let a flick wait until you steer. Preferences keep it simple, with advanced settings when you want them. Give individual apps their own distance, or switch smoothing off for them, such as games.
+> For hands-free reading, make coasts calmer, or let a flick start autoscroll. Good defaults out of the box, and one clear Preferences window to fine-tune. Give individual apps their own distance, or switch smoothing off for them, such as games.
 >
 > Screzy lives quietly in the system tray, uses no CPU while you're not scrolling, and never connects to the internet. No accounts, no ads, no tracking. It's free and open source.
 >

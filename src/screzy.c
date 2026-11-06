@@ -52,15 +52,13 @@ static struct {
     double coast_time;   /* seconds a flick keeps gliding; 0 = off, >= 999 = until stopped */
     double flick_rate;   /* wheel speed (clicks/s) that counts as a flick */
     int    flick_clicks; /* fast clicks in a row needed before a flick coasts */
-    double coast_start;  /* coast starting speed in lines/s; 0 = the flick's own speed */
     double coast_scale;  /* with the flick's own speed: start at this times it (0.25..2) */
-    int    coast_wait;   /* a flick only arms a coast at standstill ("ready"); wheel/rollerbar starts it */
-    int    ready_key;    /* Ready shortcut: 0 off, 1 Alt + middle click, 2 Alt + G */
+    int    auto_start;   /* autoscroll starts at startSpeeds[auto_start] (0..8 = 0..10 lines/s) */
+    int    coast_wait;   /* autoscroll: a flick stops the page and the pointer (or rollerbar) steers */
     double coast_max;    /* max coast speed in lines/s; 0 = no limit */
     int    steer;        /* steer coasts with the pointer: 0 off, 1 push (pointer held), 2 distance from start */
     double steer_sens;   /* steering: coast-speed change in lines/s per pixel moved */
     int    opp_stops;    /* opposite wheel click stops a coast (else: slows it down) */
-    int    until_click;  /* a coast the user has steered never ends by itself, only by a click */
     int    indicator;    /* show the coast indicator next to the pointer */
     AppRule apps[MAX_APPS];
     int    napps;
@@ -83,7 +81,12 @@ static LONGLONG lastClickQ = 0;    /* QPC time of the last wheel click */
 static int    coastHeld = 0;       /* user steered/nudged: hold the speed instead of decaying */
 static int    coastWaiting = 0;    /* armed at standstill ("ready"), waiting for wheel/rollerbar */
 static int    flickTail = 0;       /* ready came from a flick: ignore its trailing clicks for a moment */
+/* Coast starting speed choices (lines/s): fine steps where slow reading speeds live. Also the
+   wheel's speed ladder in autoscroll. */
+static const int startSpeeds[19] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100};
 static double steerTarget = 0;     /* distance steering: speed the coast eases toward */
+static double steerPtr = 0;        /* autoscroll: the pointer's part of steerTarget */
+static int    wheelStep = 0;       /* autoscroll: the wheel's part, a signed step on startSpeeds */
 static int    steerTargetOn = 0;
 static volatile int autoScroll = 0; /* autoscroll (the shortcut): the pointer steers the coast */
 static int    steerEngaged = 0;    /* pointer movement passed the dead zone this coast */
@@ -108,7 +111,7 @@ static void stop_all(void) {       /* caller holds `lock` */
     coastArmed = coasting = 0; coastVel = coastElapsed = 0;
     coastHeld = steerEngaged = coastWaiting = flickTail = 0; slowTime = 0;
     autoScroll = 0;
-    steerTarget = 0; steerTargetOn = 0;
+    steerTarget = 0; steerTargetOn = 0; steerPtr = 0; wheelStep = 0;
     coastTail = 0;
     momOn = momTail = 0; momVel = softStrength = 0;
 }
@@ -117,7 +120,6 @@ static volatile int enabled = 1;
 static volatile int running = 1;
 static HHOOK hook;
 static HWND  hwndMain;
-static void update_hotkey(void);
 static NOTIFYICONDATAA nid;
 static char iniPath[MAX_PATH];
 static HICON icoOn, icoOff;
@@ -141,13 +143,11 @@ static int write_default_ini(void) {   /* returns 1 on first run */
     WritePrivateProfileStringA("general", "flick_clicks_per_s", "8", iniPath);
     WritePrivateProfileStringA("general", "flick_clicks_needed", "10", iniPath);
     WritePrivateProfileStringA("general", "coast_start_lines_per_s", "flick", iniPath);
+    WritePrivateProfileStringA("general", "autoscroll_start_lines_per_s", "10", iniPath);
     WritePrivateProfileStringA("general", "coast_max_lines_per_s", "60", iniPath);
-    WritePrivateProfileStringA("general", "steer_with_pointer", "0", iniPath);
     WritePrivateProfileStringA("general", "steer_sensitivity", "1.0", iniPath);
     WritePrivateProfileStringA("general", "opposite_click_stops_coast", "0", iniPath);
-    WritePrivateProfileStringA("general", "steered_coast_until_click", "0", iniPath);
     WritePrivateProfileStringA("general", "show_coast_indicator", "0", iniPath);
-    WritePrivateProfileStringA("general", "ready_shortcut", "off", iniPath);
     /* Per-app rules: exe name = speed multiplier, or "off" to disable. */
     /* No per-app rules by default; users add them in Preferences. */
     return 1;
@@ -189,14 +189,11 @@ static void load_config(void) {
         char cb[32];
         GetPrivateProfileStringA("general", "coast_start_lines_per_s", "flick", cb, sizeof cb, iniPath);
         cfg.coast_wait  = _stricmp(cb, "wait") == 0;
+        /* "flick", "flick*0.5" or "wait". An old fixed pace (a number) means as flicked. */
         cfg.coast_scale = 1.0;
-        if (_strnicmp(cb, "flick", 5) == 0) {          /* "flick" or "flick*0.5" */
-            cfg.coast_start = 0;
-            if (cb[5] == '*') cfg.coast_scale = atof(cb + 6);
-            if (cfg.coast_scale < 0.25) cfg.coast_scale = 0.25;
-            if (cfg.coast_scale > 2.0) cfg.coast_scale = 2.0;
-        } else cfg.coast_start = cfg.coast_wait ? 0 : atof(cb);
-        if (cfg.coast_start < 0) cfg.coast_start = 0;
+        if (_strnicmp(cb, "flick*", 6) == 0) cfg.coast_scale = atof(cb + 6);
+        if (cfg.coast_scale < 0.25) cfg.coast_scale = 0.25;
+        if (cfg.coast_scale > 2.0) cfg.coast_scale = 2.0;
     }
     if (cfg.flick_clicks < 2) cfg.flick_clicks = 2;
     if (cfg.flick_rate < 4) cfg.flick_rate = 4;
@@ -206,20 +203,16 @@ static void load_config(void) {
         cfg.coast_max = (_stricmp(cb, "none") == 0) ? 0 : atof(cb);
         if (cfg.coast_max < 0) cfg.coast_max = 0;
     }
-    cfg.steer        = (int)get_double("general", "steer_with_pointer", 0);   /* 0 off, 1 push, 2 distance */
-    if (cfg.steer < 0 || cfg.steer > 2) cfg.steer = 0;
     cfg.steer_sens   = get_double("general", "steer_sensitivity", 1.0);
+    {   /* stored in lines/s; kept as the nearest step 0..8 of startSpeeds (0..10 lines/s) */
+        double v = get_double("general", "autoscroll_start_lines_per_s", 10);
+        int k, best = 0;
+        for (k = 1; k <= 8; k++) if (fabs(startSpeeds[k] - v) < fabs(startSpeeds[best] - v)) best = k;
+        cfg.auto_start = best;
+    }
     if (cfg.steer_sens <= 0) cfg.steer_sens = 1.0;
     cfg.opp_stops    = (int)get_double("general", "opposite_click_stops_coast", 0) != 0;
-    cfg.until_click  = (int)get_double("general", "steered_coast_until_click", 0) != 0;
     cfg.indicator    = (int)get_double("general", "show_coast_indicator", 0) != 0;
-    {
-        char rk[32];
-        GetPrivateProfileStringA("general", "ready_shortcut", "off", rk, sizeof rk, iniPath);
-        cfg.ready_key = _stricmp(rk, "alt+middle") == 0 ? 1 : _stricmp(rk, "alt+g") == 0 ? 2 : 0;
-    }
-    /* Pointer steering now lives in autoscroll: someone who had it on gets the shortcut. */
-    if (cfg.steer && !cfg.ready_key) cfg.ready_key = 1;
     if (cfg.speed <= 0) cfg.speed = 1;
     if (cfg.duration_ms < 20) cfg.duration_ms = 20;
     cfg.napps = 0;
@@ -287,32 +280,10 @@ static double app_speed_at(POINT pt) {
     return mult;
 }
 
-/* Enter "ready": a coast at standstill at the pointer, nothing scrolled. The wheel or
-   rollerbar then starts it; a click ends it. Caller must NOT hold `lock`. */
-static void enter_ready(POINT pt) {
-    EnterCriticalSection(&lock);
-    stop_all();
-    coastArmed = coasting = 1;
-    coastVel = 0; coastHeld = 1; coastWaiting = 1; coastElapsed = 0;
-    autoScroll = 1;
-    steerAnchorY = pt.y; steerAnchorX = pt.x;
-    coastPtX = pt.x; coastPtY = pt.y;
-    coastWnd = GetAncestor(WindowFromPoint(pt), GA_ROOTOWNER); coastFg = GetForegroundWindow();
-    lastDir = 0;
-    LeaveCriticalSection(&lock);
-    PostMessageA(hwndMain, WM_COASTSTART, 0, 0);
-    SetEvent(wake);
-}
-
-/* After we swallow Alt + middle click, a lone Alt release would open the app's menu bar.
-   Tapping an unassigned key in between (vk 0xE8) tells Windows Alt was "used". */
-static void mask_alt_menu(void) {
-    INPUT in[2];
-    ZeroMemory(in, sizeof in);
-    in[0].type = in[1].type = INPUT_KEYBOARD;
-    in[0].ki.wVk = in[1].ki.wVk = 0xE8;
-    in[1].ki.dwFlags = KEYEVENTF_KEYUP;
-    SendInput(2, in, sizeof(INPUT));
+/* Autoscroll speed from the wheel's step, in wheel units/s (positive = up). */
+static double wheel_v(void) {
+    int k = wheelStep < 0 ? -wheelStep : wheelStep;
+    return (wheelStep < 0 ? -1 : 1) * startSpeeds[k] * WHEEL_DELTA / (double)wlinesG;
 }
 
 /* ------------------------------------------------------------ mouse hook */
@@ -342,11 +313,13 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
                     double frac = px / full; if (frac > 1) frac = 1;
                     double maxL = cfg.coast_max > 0 ? cfg.coast_max : 300.0;
                     double lines = maxL * pow(frac, 1.6);
-                    steerTarget = (d > 0 ? -1 : 1) * lines * WHEEL_DELTA / (double)wlinesG;
+                    steerPtr = (d > 0 ? -1 : 1) * lines * WHEEL_DELTA / (double)wlinesG;
+                    steerTarget = steerPtr + wheel_v();
                     steerTargetOn = 1;
                     steerEngaged = 1; coastHeld = 1; coastWaiting = 0; flickTail = 0;
                 } else if (steerEngaged) {
-                    steerTarget = 0; steerTargetOn = 1;            /* back at the start: stand still */
+                    steerPtr = 0;                                  /* back at the start: the wheel's speed */
+                    steerTarget = wheel_v(); steerTargetOn = 1;
                 }
             }
             LeaveCriticalSection(&lock);
@@ -382,17 +355,6 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
         !(((MSLLHOOKSTRUCT *)lp)->flags & LLMHF_INJECTED)) {
         EnterCriticalSection(&lock); if (momOn && !coastArmed) stop_all(); LeaveCriticalSection(&lock);
     }
-    /* Ready shortcut: Alt + middle click. Only the Alt state is checked, at this moment. */
-    if (code == HC_ACTION && wp == WM_MBUTTONDOWN && cfg.ready_key == 1 && enabled &&
-        !(((MSLLHOOKSTRUCT *)lp)->flags & LLMHF_INJECTED) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
-        POINT pt = ((MSLLHOOKSTRUCT *)lp)->pt;
-        if (app_speed_at(pt) > 0) {          /* not in apps where smoothing is off */
-            enter_ready(pt);
-            mask_alt_menu();
-            swallowUp = WM_MBUTTONUP;
-            return 1;
-        }
-    }
     if (code == HC_ACTION && wp == WM_MOUSEWHEEL && enabled) {
         MSLLHOOKSTRUCT *m = (MSLLHOOKSTRUCT *)lp;
         if (!(m->flags & LLMHF_INJECTED)) {
@@ -415,10 +377,27 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
                     EnterCriticalSection(&lock);
                     if (coasting && flickTail && dir == lastDir &&
                         (double)(q.QuadPart - lastClickQ) / (double)hookFreq < 0.35) {
-                        /* Still the tail end of the flick that armed "ready": a spinning wheel
-                           lets a few late clicks through. Ignore them until the wheel pauses. */
+                        /* Still the tail end of the flick that started this coast: a spinning
+                           wheel lets a few late clicks through. Ignore them until the wheel
+                           pauses, so they don't count as nudges (which would make every fixed
+                           pace come out about the same). */
                         lastClickQ = lastQ = q.QuadPart;
                         LeaveCriticalSection(&lock);
+                        return 1;
+                    }
+                    if (coasting && autoScroll) {
+                        /* Autoscroll: each click moves one step along the speed ladder, down
+                           through a standstill and into reverse. It adds to the pointer's speed
+                           and never ends autoscroll; only a mouse click does. */
+                        flickTail = 0;
+                        wheelStep += dir;
+                        if (wheelStep > 18) wheelStep = 18;
+                        if (wheelStep < -18) wheelStep = -18;
+                        steerTarget = steerPtr + wheel_v(); steerTargetOn = 1;
+                        coastHeld = 1; coastWaiting = 0;
+                        lastQ = q.QuadPart;
+                        LeaveCriticalSection(&lock);
+                        SetEvent(wake);
                         return 1;
                     }
                     if (coasting) {
@@ -633,13 +612,16 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
                 /* Hand off seamlessly: carry on at the speed on screen right now, and give
                    the spring the lead it needs to hold that speed (no dip, no surge). */
                 double w = 4.74 / (cfg.duration_ms / 1000.0);
-                coasting = 1; coastElapsed = 0;
-                coastVel = vel * (cfg.coast_start > 0 ? 1.0 : cfg.coast_scale);
-                /* Optional fixed starting speed: the flick picks the direction, then the
-                   coast settles to a calm pace (handy for steering with the rollerbar). The
-                   spring eases from the flick's speed down to it - no sudden stop. */
-                if (cfg.coast_start > 0) coastVel = (vel > 0 ? 1 : -1) * cfg.coast_start * WHEEL_DELTA / wlines;
-                if (cfg.coast_wait) { coastVel = 0; coastHeld = 1; coastWaiting = 1; flickTail = 1; }
+                coasting = 1; coastElapsed = 0; flickTail = 1;
+                coastVel = vel * cfg.coast_scale;   /* Coast speed: 0.25..2x the flick */
+                if (cfg.coast_wait) {
+                    /* Autoscroll: stop the flick, then (optionally) set off at the chosen pace in
+                       the flick's direction, as if the wheel had been clicked up to that step. */
+                    coastVel = 0; coastHeld = 1; flickTail = 1; autoScroll = 1;
+                    wheelStep = (vel > 0 ? 1 : -1) * cfg.auto_start;
+                    steerPtr = 0; steerTarget = wheel_v(); steerTargetOn = cfg.auto_start > 0;
+                    coastWaiting = cfg.auto_start == 0;
+                }
                 double lead = 2.0 * coastVel / w;
                 { POINT p; if (GetCursorPos(&p)) { steerAnchorY = p.y; steerAnchorX = p.x;
                                                    coastPtX = p.x; coastPtY = p.y;
@@ -653,9 +635,7 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
             /* Keep extending the glide's target at coastVel; the spring follows smoothly. */
             double minV = 360.0 / wlines;   /* below ~3 lines/s, stop */
             double stillV = 60.0 / wlines;  /* ~0.5 lines/s: "standing still" for coasts */
-            /* A slow fixed starting speed must not count as "ran down" straight away. */
-            double endV = cfg.coast_start > 0 && cfg.coast_start * WHEEL_DELTA / wlines * 0.3 < minV
-                          ? cfg.coast_start * WHEEL_DELTA / wlines * 0.3 : minV;
+            double endV = minV;
             double maxV = cfg.coast_max > 0 ? cfg.coast_max * WHEEL_DELTA / wlines : 1e12;
             for (f = 0; f < frames; f++) {
                 if (steerTargetOn) coastVel += (steerTarget - coastVel) * (1.0 - exp(-dt / 0.08));
@@ -678,7 +658,7 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
                 coastTail = 0;
                 /* Held coasts may pass through zero (to reverse). With "until I click" they
                    never end by themselves; otherwise one that sits still for 1 s ends. */
-                if (fabs(coastVel) < stillV && !cfg.until_click && !coastWaiting && !autoScroll) slowTime += frames * dt; else slowTime = 0;
+                if (fabs(coastVel) < stillV && !coastWaiting && !autoScroll) slowTime += frames * dt; else slowTime = 0;
                 if (slowTime > 1.0) { coastArmed = coasting = 0; coastVel = 0; coastHeld = steerEngaged = 0; pending = 0; vel = 0; }
             } else if (cfg.coast_time <= 0) {
                 coastArmed = coasting = 0; coastVel = 0;
@@ -794,25 +774,16 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
 static HWND hPrefs;
 static AppRule wk[MAX_APPS];   /* working copy of per-app rules */
 static int nwk;
-#define NTB 11
+#define NTB 12
 typedef char ntb_fits_id_range[(NTB <= 40) ? 1 : -1];
-#define ID_ADV 231     /* Show / hide advanced (231 was the old opposite-click checkbox) */
-#define ID_RKEY 234
 static const char *tbName[NTB] = {"Distance per wheel click", "Glide duration (ms)", "Acceleration",
                                 "Max acceleration", "Acceleration starts at",
                                   "Coast length", "Flick speed to coast",
                                   "Max coast speed", "Autoscroll sensitivity", "Clicks needed to coast",
-                                  "Coast speed"};
-static const int tbMin[NTB] = {2, 5, 0, 10, 2, 0, 8, 1, 1, 2, 1};
-static const int tbMax[NTB] = {200, 120, 200, 100, 20, 21, 40, 31, 30, 12, 40};   /* start: 0 = as flicked, 1 = wait (ready), 2..19 = startSpeeds[1..18] */   /* coast: 0=off, 1..20 = 0.5..10 s, 21 = until stopped; max: 31 = no limit */
-static const double tbScale[NTB] = {0.1, 10, 0.01, 0.1, 1, 0.5, 1, 10, 0.1, 1, 1};
-/* Coast starting speed choices (lines/s): fine steps where slow reading speeds live. */
-static const int startSpeeds[19] = {0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 15, 20, 25, 30, 40, 50, 60, 80, 100};
-static int start_pos(double v) {
-    int k, best = 0;
-    for (k = 1; k < 19; k++) if (fabs(startSpeeds[k] - v) < fabs(startSpeeds[best] - v)) best = k;
-    return v <= 0 ? 0 : best;
-}
+                                  "Coast speed", "Autoscroll starts at"};
+static const int tbMin[NTB] = {2, 5, 0, 10, 2, 0, 8, 1, 1, 2, 5, 0};
+static const int tbMax[NTB] = {200, 120, 200, 100, 20, 21, 40, 31, 30, 12, 40, 8};   /* coast: 0=off, 1..20 = 0.5..10 s, 21 = until stopped; max: 31 = no limit */
+static const double tbScale[NTB] = {0.1, 10, 0.01, 0.1, 1, 0.5, 1, 10, 0.1, 1, 1, 1};   /* 11: step on startSpeeds */
 
 static void save_config(void) {
     char b[64]; int i;
@@ -827,19 +798,19 @@ static void save_config(void) {
     snprintf(b, sizeof b, "%g", cfg.flick_rate);   WritePrivateProfileStringA("general", "flick_clicks_per_s", b, iniPath);
     snprintf(b, sizeof b, "%d", cfg.flick_clicks); WritePrivateProfileStringA("general", "flick_clicks_needed", b, iniPath);
     if (cfg.coast_wait) snprintf(b, sizeof b, "wait");
-    else if (cfg.coast_start <= 0) {
-        if (fabs(cfg.coast_scale - 1.0) < 0.001) snprintf(b, sizeof b, "flick");
-        else snprintf(b, sizeof b, "flick*%g", cfg.coast_scale);
-    } else snprintf(b, sizeof b, "%g", cfg.coast_start);
+    else if (fabs(cfg.coast_scale - 1.0) < 0.001) snprintf(b, sizeof b, "flick");
+    else snprintf(b, sizeof b, "flick*%g", cfg.coast_scale);
     WritePrivateProfileStringA("general", "coast_start_lines_per_s", b, iniPath);
     if (cfg.coast_max <= 0) snprintf(b, sizeof b, "none"); else snprintf(b, sizeof b, "%g", cfg.coast_max);
     WritePrivateProfileStringA("general", "coast_max_lines_per_s", b, iniPath);
     WritePrivateProfileStringA("general", "steer_with_pointer", NULL, iniPath);   /* old setting */
     snprintf(b, sizeof b, "%g", cfg.steer_sens);   WritePrivateProfileStringA("general", "steer_sensitivity", b, iniPath);
+    snprintf(b, sizeof b, "%d", startSpeeds[cfg.auto_start]); WritePrivateProfileStringA("general", "autoscroll_start_lines_per_s", b, iniPath);
     WritePrivateProfileStringA("general", "opposite_click_stops_coast", cfg.opp_stops ? "1" : "0", iniPath);
-    WritePrivateProfileStringA("general", "steered_coast_until_click", cfg.until_click ? "1" : "0", iniPath);
+    WritePrivateProfileStringA("general", "steered_coast_until_click", NULL, iniPath);   /* old setting */
+    WritePrivateProfileStringA("general", "prefs_show_advanced", NULL, iniPath);         /* old setting */
     WritePrivateProfileStringA("general", "show_coast_indicator", cfg.indicator ? "1" : "0", iniPath);
-    WritePrivateProfileStringA("general", "ready_shortcut", cfg.ready_key == 1 ? "alt+middle" : cfg.ready_key == 2 ? "alt+g" : "off", iniPath);
+    WritePrivateProfileStringA("general", "ready_shortcut", NULL, iniPath);       /* old setting */
     WritePrivateProfileStringA("apps", NULL, NULL, iniPath);
     for (i = 0; i < cfg.napps; i++) {
         if (cfg.apps[i].disabled) snprintf(b, sizeof b, "off");
@@ -849,18 +820,12 @@ static void save_config(void) {
     note_ini_stamp();
 }
 
-/* Coast starts: 0 = as flicked (slider = 0.25..2x the flick, in 0.05 steps), 1 = fixed pace
-   (slider = startSpeeds[1..18]), 2 = wait (ready, slider unused). Each mode keeps its own position. */
-#define ID_CMODE 230
-static int startMode, startPosMem[2] = {20, 8};
-static void tb_label(int i);
-static void start_setup(HWND h) {
-    HWND tb = GetDlgItem(h, ID_TB0 + 10);
-    int m = startMode == 1 ? 1 : 0;
-    SendMessageA(tb, TBM_SETRANGE, TRUE, startMode == 1 ? MAKELONG(1, 18) : MAKELONG(5, 40));
-    SendMessageA(tb, TBM_SETPOS, TRUE, startPosMem[m]);
-    EnableWindow(tb, startMode != 2);
-    tb_label(10);
+/* "A flick starts autoscroll": the two autoscroll sliders only mean something when it's on. */
+#define ID_AUTO 230
+static void auto_enable(HWND h) {
+    int on = IsDlgButtonChecked(h, ID_AUTO) == BST_CHECKED;
+    EnableWindow(GetDlgItem(h, ID_TB0 + 11), on);
+    EnableWindow(GetDlgItem(h, ID_TB0 + 8), on);
 }
 
 static void tb_label(int i) {
@@ -882,13 +847,12 @@ static void tb_label(int i) {
     }
     else if (i == 8) snprintf(b, sizeof b, "%.1fx", v);
     else if (i == 9) snprintf(b, sizeof b, "%d clicks", (int)v);
-    else if (i == 10) {           /* meaning follows the "Coast starts" dropdown */
-        if (startMode == 2) snprintf(b, sizeof b, "-");
-        else if (startMode == 1) {
-            int k = pos < 1 ? 1 : pos > 18 ? 18 : pos;
-            snprintf(b, sizeof b, "%d line%s/s", startSpeeds[k], startSpeeds[k] == 1 ? "" : "s");
-        } else snprintf(b, sizeof b, "%gx the flick", pos * 0.05);
+    else if (i == 11) {
+        int k = pos < 0 ? 0 : pos > 8 ? 8 : pos;
+        if (k == 0) snprintf(b, sizeof b, "Standstill");
+        else snprintf(b, sizeof b, "%d line%s/s", startSpeeds[k], startSpeeds[k] == 1 ? "" : "s");
     }
+    else if (i == 10) snprintf(b, sizeof b, "%gx the flick", pos * 0.05);
     else if (i == 5) {
         if (pos == 0) snprintf(b, sizeof b, "Off");
         else if (pos >= 21) snprintf(b, sizeof b, "Until stopped");
@@ -916,7 +880,7 @@ static void apply_prefs(void) {
     cfg.duration_ms  = SendDlgItemMessageA(hPrefs, ID_TB0 + 1, TBM_GETPOS, 0, 0) * tbScale[1];
     cfg.accel        = SendDlgItemMessageA(hPrefs, ID_TB0 + 2, TBM_GETPOS, 0, 0) * tbScale[2];
     cfg.accel_max    = SendDlgItemMessageA(hPrefs, ID_TB0 + 3, TBM_GETPOS, 0, 0) * tbScale[3];
-    cfg.accel_start  = SendDlgItemMessageA(hPrefs, ID_TB0 + 4, TBM_GETPOS, 0, 0) * tbScale[4];
+    /* accel_start (Acceleration starts at) is only in the ini now */
     {
         int cp = (int)SendDlgItemMessageA(hPrefs, ID_TB0 + 5, TBM_GETPOS, 0, 0);
         cfg.coast_time = cp >= 21 ? 999 : cp * tbScale[5];
@@ -926,21 +890,16 @@ static void apply_prefs(void) {
         int mp = (int)SendDlgItemMessageA(hPrefs, ID_TB0 + 7, TBM_GETPOS, 0, 0);
         cfg.coast_max = mp >= 31 ? 0 : mp * tbScale[7];
     }
-    cfg.steer_sens   = SendDlgItemMessageA(hPrefs, ID_TB0 + 8, TBM_GETPOS, 0, 0) * tbScale[8];
     cfg.flick_clicks = (int)SendDlgItemMessageA(hPrefs, ID_TB0 + 9, TBM_GETPOS, 0, 0);
-    { int sp = (int)SendDlgItemMessageA(hPrefs, ID_TB0 + 10, TBM_GETPOS, 0, 0);
-      cfg.coast_wait = startMode == 2;
-      cfg.coast_start = 0;
-      if (startMode == 1) cfg.coast_start = startSpeeds[sp < 1 ? 1 : sp > 18 ? 18 : sp];
-      else if (startMode == 0) cfg.coast_scale = sp * 0.05; }
-    { int rk = (int)SendDlgItemMessageA(hPrefs, ID_RKEY, CB_GETCURSEL, 0, 0); cfg.ready_key = rk < 0 ? 0 : rk; }
-    cfg.steer = 0;
+    cfg.coast_scale  = SendDlgItemMessageA(hPrefs, ID_TB0 + 10, TBM_GETPOS, 0, 0) * 0.05;
+    cfg.steer_sens   = SendDlgItemMessageA(hPrefs, ID_TB0 + 8, TBM_GETPOS, 0, 0) * tbScale[8];
+    cfg.coast_wait   = IsDlgButtonChecked(hPrefs, ID_AUTO) == BST_CHECKED;
+    cfg.auto_start   = (int)SendDlgItemMessageA(hPrefs, ID_TB0 + 11, TBM_GETPOS, 0, 0);
     cfg.napps = nwk;
     for (i = 0; i < nwk; i++) cfg.apps[i] = wk[i];
     stop_all();
     LeaveCriticalSection(&lock);
     save_config();
-    update_hotkey();
 }
 
 #define ID_STATUS 229
@@ -1048,7 +1007,8 @@ static void slider_positions(double cur[NTB]) {
     cur[7] = cfg.coast_max <= 0 ? 31 : cfg.coast_max / tbScale[7];
     cur[8] = cfg.steer_sens / tbScale[8];
     cur[9] = cfg.flick_clicks;
-    cur[10] = cfg.coast_scale / 0.05;   /* start_setup() sets the real range and position */
+    cur[10] = cfg.coast_scale / 0.05;
+    cur[11] = cfg.auto_start;
 }
 
 /* Fill every Preferences control from the settings in memory. Used when the window opens, and again
@@ -1062,16 +1022,12 @@ static void sync_prefs(HWND h) {
         if (p > tbMax[i]) p = tbMax[i];
         SendDlgItemMessageA(h, ID_TB0 + i, TBM_SETPOS, TRUE, p);
     }
-    SendDlgItemMessageA(h, ID_RKEY, CB_SETCURSEL, cfg.ready_key, 0);
-    startMode = cfg.coast_wait ? 2 : cfg.coast_start > 0 ? 1 : 0;
-    startPosMem[0] = (int)(cfg.coast_scale / 0.05 + 0.5);
-    startPosMem[1] = cfg.coast_start > 0 ? start_pos(cfg.coast_start) : 8;
-    SendDlgItemMessageA(h, ID_CMODE, CB_SETCURSEL, startMode, 0);
+    CheckDlgButton(h, ID_AUTO, cfg.coast_wait ? BST_CHECKED : BST_UNCHECKED);
     nwk = cfg.napps;
     for (i = 0; i < nwk; i++) wk[i] = cfg.apps[i];
     refresh_list();
     for (i = 0; i < NTB; i++) tb_label(i);
-    start_setup(h);
+    auto_enable(h);
     loading = 1;
     SetDlgItemTextA(h, ID_NAME, "");
     SetDlgItemTextA(h, ID_ASPD, "1.0");
@@ -1081,7 +1037,6 @@ static void sync_prefs(HWND h) {
     set_dirty(0);
 }
 
-static void update_hotkey(void);
 
 /* Re-read the ini and refresh an open Preferences window. Unless `force`, this does nothing when the file
    is as we last read or wrote it, so it's cheap enough to call whenever the tray menu or Preferences opens. */
@@ -1090,42 +1045,23 @@ static void reload_settings(int force) {
     if (!force && (!GetFileAttributesExA(iniPath, GetFileExInfoStandard, &d) ||
                    CompareFileTime(&d.ftLastWriteTime, &iniStamp) == 0)) return;
     load_config();
-    update_hotkey();
     if (hPrefs) sync_prefs(hPrefs);
 }
 
-/* Basic / Advanced: the Advanced group is shown or hidden, the bottom row moves below it,
-   and the window resizes (kept on screen). The choice is remembered in the ini. */
-#define PREFS_BASIC_H 396   /* y of the bottom row with Advanced hidden (96-dpi units) */
-#define PREFS_ADV_H   228   /* height the Advanced group adds */
-static HWND advCtl[48];
-static int  nadv, prefsAdv;
+/* One window, three sections. PREFS_H is the client height in 96-dpi units. */
+#define PREFS_H 642
 
-static int prefs_client_h(void) { return PREFS_BASIC_H + (prefsAdv ? PREFS_ADV_H : 0) + 36; }
-
-static void prefs_layout(HWND h) {
-    int i, yb = PREFS_BASIC_H + (prefsAdv ? PREFS_ADV_H : 0);
-    RECT r = {0, 0, S(560), S(prefs_client_h())}, wr;
-    MONITORINFO mi;
-    for (i = 0; i < nadv; i++) ShowWindow(advCtl[i], prefsAdv ? SW_SHOW : SW_HIDE);
-    SetWindowPos(GetDlgItem(h, ID_ADV), NULL, S(10), S(yb), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    SetWindowPos(GetDlgItem(h, ID_STATUS), NULL, S(128), S(yb + 6), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    SetWindowPos(GetDlgItem(h, IDOK), NULL, S(290), S(yb), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    SetWindowPos(GetDlgItem(h, ID_APPLY), NULL, S(380), S(yb), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    SetWindowPos(GetDlgItem(h, IDCANCEL), NULL, S(470), S(yb), 0, 0, SWP_NOSIZE | SWP_NOZORDER);
-    SetDlgItemTextA(h, ID_ADV, prefsAdv ? "Hide advanced" : "Show advanced");
-    AdjustWindowRect(&r, WS_CAPTION | WS_SYSMENU, FALSE);
+/* Keep the window on its monitor's work area (it's tall at 150% on a 1080p screen). */
+static void prefs_fit(HWND h) {
+    RECT wr; MONITORINFO mi;
     GetWindowRect(h, &wr);
-    {
-        int ww = r.right - r.left, wh = r.bottom - r.top, x = wr.left, y = wr.top;
-        mi.cbSize = sizeof mi;
-        if (GetMonitorInfoA(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &mi)) {
-            if (y + wh > mi.rcWork.bottom) y = mi.rcWork.bottom - wh;
-            if (y < mi.rcWork.top) y = mi.rcWork.top;
-        }
-        SetWindowPos(h, NULL, x, y, ww, wh, SWP_NOZORDER | SWP_NOACTIVATE);
+    mi.cbSize = sizeof mi;
+    if (GetMonitorInfoA(MonitorFromWindow(h, MONITOR_DEFAULTTONEAREST), &mi)) {
+        int y = wr.top, wh = wr.bottom - wr.top;
+        if (y + wh > mi.rcWork.bottom) y = mi.rcWork.bottom - wh;
+        if (y < mi.rcWork.top) y = mi.rcWork.top;
+        if (y != wr.top) SetWindowPos(h, NULL, wr.left, y, 0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
     }
-    InvalidateRect(h, NULL, TRUE);
 }
 
 static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
@@ -1141,72 +1077,49 @@ static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
            so text drawn at the system's size always has room. */
 #define MK(cls, txt, style, x, y, w, ht, id) \
         CreateWindowA(cls, txt, WS_CHILD | WS_VISIBLE | (style), S(x), S(y), S(w), S(ht), h, (HMENU)(INT_PTR)(id), hi, NULL)
-        /* Basic settings first; the Advanced group sits below "Try it" and is shown or
-           hidden by its button (prefs_layout moves the bottom row and resizes the window). */
-        nadv = 0;
-#define ROW(i, y, adv) do { \
+#define ROW(i, y) do { \
             int p_ = (int)(cur[i] + 0.5); \
-            HWND l_ = MK("STATIC", tbName[i], 0, 22, (y) + 3, 162, 18, 0); \
-            HWND t_ = MK(TRACKBAR_CLASSA, "", WS_TABSTOP | TBS_NOTICKS, 186, (y), 256, 24, ID_TB0 + (i)); \
-            HWND v_ = MK("STATIC", "", 0, 448, (y) + 3, 98, 18, ID_VAL0 + (i)); \
+            HWND t_; \
+            MK("STATIC", tbName[i], 0, 22, (y) + 3, 162, 18, 0); \
+            t_ = MK(TRACKBAR_CLASSA, "", WS_TABSTOP | TBS_NOTICKS, 186, (y), 256, 24, ID_TB0 + (i)); \
+            MK("STATIC", "", 0, 448, (y) + 3, 98, 18, ID_VAL0 + (i)); \
             SendMessageA(t_, TBM_SETRANGE, TRUE, MAKELONG(tbMin[i], tbMax[i])); \
             if (p_ < tbMin[i]) p_ = tbMin[i]; \
             if (p_ > tbMax[i]) p_ = tbMax[i]; \
             SendMessageA(t_, TBM_SETPOS, TRUE, p_); \
-            if (adv) { advCtl[nadv++] = l_; advCtl[nadv++] = t_; advCtl[nadv++] = v_; } \
         } while (0)
-        MK("BUTTON", "Scrolling", BS_GROUPBOX, 10, 6, 540, 102, 0);
-        ROW(0, 26, 0); ROW(1, 52, 0); ROW(2, 78, 0);
-        MK("BUTTON", "Coasting", BS_GROUPBOX, 10, 114, 540, 78, 0);
-        ROW(5, 134, 0); ROW(9, 160, 0);
-
-        MK("BUTTON", "Per-app rules", BS_GROUPBOX, 10, 198, 540, 118, 0);
-        MK("LISTBOX", "", WS_TABSTOP | WS_BORDER | WS_VSCROLL | LBS_NOTIFY, 22, 218, 236, 88, ID_LIST);
-        MK("STATIC", "App .exe name (e.g. chrome.exe)", 0, 270, 216, 270, 16, 0);
-        MK("EDIT", "", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 270, 232, 142, 22, ID_NAME);
-        MK("BUTTON", "Running apps...", WS_TABSTOP, 418, 231, 122, 24, ID_PICK);
-        CreateWindowW(L"STATIC", L"Distance ×", WS_CHILD | WS_VISIBLE, S(270), S(264), S(68), S(16), h, NULL, hi, NULL);
-        MK("EDIT", "1.0", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 340, 260, 44, 22, ID_ASPD);
-        MK("BUTTON", "Disable smoothing", WS_TABSTOP | BS_AUTOCHECKBOX, 394, 262, 150, 20, ID_AOFF);
-        MK("BUTTON", "Add / Update", WS_TABSTOP, 270, 288, 112, 24, ID_ASET);
-        MK("BUTTON", "Remove", WS_TABSTOP, 392, 288, 92, 24, ID_ADEL);
-
-        MK("STATIC", "Try it - scroll here with your new settings (press Apply first):", 0, 12, 324, 530, 16, 0);
-        MK("EDIT", "", WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_READONLY, 10, 342, 540, 46, ID_TEST);
-
-        /* Advanced (PREFS_BASIC_H .. + PREFS_ADV_H) */
-        advCtl[nadv++] = MK("BUTTON", "Advanced", BS_GROUPBOX, 10, 396, 540, 222, 0);
-        ROW(3, 414, 1); ROW(4, 438, 1); ROW(6, 462, 1); ROW(7, 486, 1);
-        advCtl[nadv++] = MK("STATIC", "Coast starts", 0, 22, 514, 160, 18, 0);
-        {
-            HWND cb = MK("COMBOBOX", "", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, 186, 510, 196, 120, ID_CMODE);
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"As flicked");
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"Fixed pace");
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"Wait (ready)");
-            advCtl[nadv++] = cb;
-        }
-        ROW(10, 536, 1); ROW(8, 560, 1);
-        advCtl[nadv++] = MK("STATIC", "Autoscroll shortcut", 0, 22, 592, 160, 18, 0);
-        {
-            HWND cb = MK("COMBOBOX", "", WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST, 186, 588, 196, 120, ID_RKEY);
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"Off");
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"Alt + middle click");
-            SendMessageA(cb, CB_ADDSTRING, 0, (LPARAM)"Alt + G");
-            SendMessageA(cb, CB_SETCURSEL, cfg.ready_key, 0);
-            advCtl[nadv++] = cb;
-        }
+        MK("BUTTON", "Scrolling", BS_GROUPBOX, 10, 6, 540, 128, 0);
+        ROW(0, 26); ROW(1, 52); ROW(2, 78); ROW(3, 104);
+        MK("BUTTON", "Coasting", BS_GROUPBOX, 10, 140, 540, 154, 0);
+        ROW(5, 160); ROW(10, 186); ROW(9, 212); ROW(6, 238); ROW(7, 264);
+        MK("BUTTON", "Autoscroll", BS_GROUPBOX, 10, 300, 540, 102, 0);
+        MK("BUTTON", "A flick starts autoscroll instead of a coast",
+           WS_TABSTOP | BS_AUTOCHECKBOX, 22, 320, 400, 20, ID_AUTO);
+        ROW(11, 346); ROW(8, 372);
 #undef ROW
 
-        /* Bottom row: placed by prefs_layout. */
-        MK("BUTTON", "Show advanced", WS_TABSTOP, 10, 396, 110, 28, ID_ADV);
-        MK("STATIC", "", 0, 128, 402, 156, 18, ID_STATUS);
-        MK("BUTTON", "OK", WS_TABSTOP | BS_DEFPUSHBUTTON, 290, 396, 80, 28, IDOK);
-        MK("BUTTON", "Apply", WS_TABSTOP, 380, 396, 80, 28, ID_APPLY);
-        MK("BUTTON", "Cancel", WS_TABSTOP, 470, 396, 80, 28, IDCANCEL);
+        MK("BUTTON", "Per-app rules", BS_GROUPBOX, 10, 408, 540, 118, 0);
+        MK("LISTBOX", "", WS_TABSTOP | WS_BORDER | WS_VSCROLL | LBS_NOTIFY, 22, 428, 236, 88, ID_LIST);
+        MK("STATIC", "App .exe name (e.g. chrome.exe)", 0, 270, 426, 270, 16, 0);
+        MK("EDIT", "", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 270, 442, 142, 22, ID_NAME);
+        MK("BUTTON", "Running apps...", WS_TABSTOP, 418, 441, 122, 24, ID_PICK);
+        CreateWindowW(L"STATIC", L"Distance \u00D7", WS_CHILD | WS_VISIBLE, S(270), S(474), S(68), S(16), h, NULL, hi, NULL);
+        MK("EDIT", "1.0", WS_TABSTOP | WS_BORDER | ES_AUTOHSCROLL, 340, 470, 44, 22, ID_ASPD);
+        MK("BUTTON", "Disable smoothing", WS_TABSTOP | BS_AUTOCHECKBOX, 394, 472, 150, 20, ID_AOFF);
+        MK("BUTTON", "Add / Update", WS_TABSTOP, 270, 498, 112, 24, ID_ASET);
+        MK("BUTTON", "Remove", WS_TABSTOP, 392, 498, 92, 24, ID_ADEL);
+
+        MK("STATIC", "Try it - scroll here with your new settings (press Apply first):", 0, 12, 534, 530, 16, 0);
+        MK("EDIT", "", WS_BORDER | WS_VSCROLL | ES_MULTILINE | ES_READONLY, 10, 552, 540, 46, ID_TEST);
+
+        MK("STATIC", "", 0, 12, 612, 260, 18, ID_STATUS);
+        MK("BUTTON", "OK", WS_TABSTOP | BS_DEFPUSHBUTTON, 290, 606, 80, 28, IDOK);
+        MK("BUTTON", "Apply", WS_TABSTOP, 380, 606, 80, 28, ID_APPLY);
+        MK("BUTTON", "Cancel", WS_TABSTOP, 470, 606, 80, 28, IDCANCEL);
 #undef MK
         set_font(h);
         sync_prefs(h);
-        prefs_layout(h);
+        prefs_fit(h);
         test = (char *)malloc(200 * 64);
         test[0] = 0;
         for (i = 1; i <= 200; i++) { char l[64]; snprintf(l, sizeof l, "Line %d - the quick brown fox jumps over the lazy dog\r\n", i); strcat(test, l); }
@@ -1235,21 +1148,11 @@ static LRESULT CALLBACK prefs_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
             }
         } else if ((id == ID_NAME || id == ID_ASPD) && code == EN_CHANGE) {
             if (!loading) { fieldsEdited = 1; set_dirty(1); }
-        } else if (id == ID_CMODE && code == CBN_SELCHANGE) {
-            int sel = (int)SendDlgItemMessageA(h, ID_CMODE, CB_GETCURSEL, 0, 0);
-            if (startMode != 2) startPosMem[startMode] = (int)SendDlgItemMessageA(h, ID_TB0 + 10, TBM_GETPOS, 0, 0);
-            startMode = sel < 0 ? 0 : sel;
-            start_setup(h);
-            set_dirty(1);
-        } else if (id == ID_RKEY && code == CBN_SELCHANGE) {
+        } else if (id == ID_AUTO && code == BN_CLICKED) {
+            auto_enable(h);
             set_dirty(1);
         } else if (id == ID_AOFF && code == BN_CLICKED) {
             fieldsEdited = 1; set_dirty(1);
-        } else if (id == ID_ADV) {
-            prefsAdv = !prefsAdv;
-            WritePrivateProfileStringA("general", "prefs_show_advanced", prefsAdv ? "1" : "0", iniPath);
-            note_ini_stamp();
-            prefs_layout(h);
         } else if (id == ID_PICK) {
             pick_running_app(h);
         } else if (id == ID_ASET) {
@@ -1294,8 +1197,7 @@ static void show_prefs(void) {
         RegisterClassA(&wc);
         reg = 1;
     }
-    prefsAdv = GetPrivateProfileIntA("general", "prefs_show_advanced", 0, iniPath) != 0;
-    RECT r = {0, 0, S(560), S(prefs_client_h())};
+    RECT r = {0, 0, S(560), S(PREFS_H)};
     AdjustWindowRect(&r, WS_CAPTION | WS_SYSMENU, FALSE);
     hPrefs = CreateWindowA("ScrezyPrefs", "Screzy v" APP_VERSION " Preferences", WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
                            CW_USEDEFAULT, CW_USEDEFAULT, r.right - r.left, r.bottom - r.top, NULL, NULL, hi, NULL);
@@ -1521,7 +1423,9 @@ static void ind_tick(HWND owner) {
     GetCursorPos(&cur);
     POINT pos = { cur.x + MulDiv(indSize, 9, 16), cur.y + MulDiv(indSize, 5, 8) };
     if (autoScroll) {
-        pos.x = steerAnchorX - indSize / 2; pos.y = steerAnchorY - indSize / 2;
+        /* beside the start point, not under the pointer: level with it so it still marks
+           the height you steer from, and far enough right to clear the pointer arrow */
+        pos.x = steerAnchorX + S(24); pos.y = steerAnchorY - indSize / 2;
         cur.x = steerAnchorX; cur.y = steerAnchorY;
     }
     mon = MonitorFromPoint(cur, MONITOR_DEFAULTTONEAREST);
@@ -1599,15 +1503,6 @@ static void update_tip(void) {
 }
 
 static UINT wmTaskbarCreated;   /* broadcast when Explorer (and the tray) restarts */
-#define HOTKEY_READY 1
-
-/* Alt + G is registered with Windows, so we're told only when that exact combination is pressed. */
-static void update_hotkey(void) {
-    UnregisterHotKey(hwndMain, HOTKEY_READY);
-    if (cfg.ready_key == 2 && !RegisterHotKey(hwndMain, HOTKEY_READY, MOD_ALT | 0x4000 /* MOD_NOREPEAT */, 'G'))
-        MessageBoxA(NULL, "Alt + G is already used by another program, so it can't be the Ready shortcut.\n"
-                          "Choose Alt + middle click in Preferences instead.", "Screzy", MB_OK | MB_ICONWARNING);
-}
 
 static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     if (wmTaskbarCreated && msg == wmTaskbarCreated) {
@@ -1618,11 +1513,6 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
     }
     if (msg == WM_TRAY && lp == WM_LBUTTONDBLCLK) { show_prefs(); return 0; }
     if (msg == WM_SHOWPREFS) { show_prefs(); return 0; }
-    if (msg == WM_HOTKEY && wp == HOTKEY_READY) {
-        POINT pt; GetCursorPos(&pt);
-        if (enabled && app_speed_at(pt) > 0) enter_ready(pt);
-        return 0;
-    }
     if (msg == WM_COASTSTART) { if (ind_wanted() && hInd) SetTimer(h, IND_TIMER, 15, NULL); return 0; }
     if (msg == WM_TIMER && wp == IND_TIMER) { ind_tick(h); return 0; }
     if (msg == WM_TRAY && (lp == WM_RBUTTONUP || lp == WM_LBUTTONUP)) {
@@ -1736,7 +1626,6 @@ int WINAPI WinMain(HINSTANCE hi, HINSTANCE hp, LPSTR cmd, int show) {
     Shell_NotifyIconA(NIM_ADD, &nid);
 
     ind_init(hi);
-    update_hotkey();
     timeBeginPeriod(1);
     hookReady = CreateEventA(NULL, TRUE, FALSE, NULL);
     HANDLE ht = CreateThread(NULL, 0, hook_thread, hi, 0, &hookThreadId);
