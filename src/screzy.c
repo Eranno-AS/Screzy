@@ -88,6 +88,14 @@ static int    steerEngaged = 0;    /* pointer movement passed the dead zone this
 static double steerAccum = 0;      /* vertical movement collected toward the dead zone */
 static LONGLONG lastSteerQ = 0;
 static double slowTime = 0;        /* how long a held coast has been near standstill */
+static int    coastTail = 0;       /* a run-down coast is easing out to zero */
+static double tailV0 = 0, tailT = 0, tailLen = 0;
+static int    tailDir = 0;
+/* Momentum: a fast run that isn't a flick yet carries on a little after the wheel stops,
+   more the faster and longer it was. Not a coast: no indicator, no steering, clicks pass. */
+static double softStrength = 0;    /* 0..1, how close the current run is to a flick */
+static int    momOn = 0, momTail = 0, momDir = 0;
+static double momVel = 0, momTau = 0, momT = 0, momLen = 0, momV0 = 0;
 static volatile UINT wlinesG = 3;  /* Windows' lines per wheel click (updated by the animation) */
 static volatile LONG steerAnchorY = 0; /* pointer height when the coast started; held there while steering */
 static volatile LONG steerAnchorX = 0; /* ... and its x, where the indicator sits in distance mode */
@@ -98,6 +106,8 @@ static void stop_all(void) {       /* caller holds `lock` */
     coastArmed = coasting = 0; coastVel = coastElapsed = 0;
     coastHeld = steerEngaged = coastWaiting = flickTail = 0; steerAccum = slowTime = 0;
     steerTarget = 0; steerTargetOn = 0;
+    coastTail = 0;
+    momOn = momTail = 0; momVel = softStrength = 0;
 }
 static int    lastDir = 0;
 static volatile int enabled = 1;
@@ -376,6 +386,12 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
         swallowUp = wp == WM_LBUTTONDOWN ? WM_LBUTTONUP : wp == WM_RBUTTONDOWN ? WM_RBUTTONUP : WM_MBUTTONUP;
         return 1;
     }
+    /* A click during momentum stops the page, but (unlike a coast) still goes through. */
+    if (code == HC_ACTION && momOn &&
+        (wp == WM_LBUTTONDOWN || wp == WM_RBUTTONDOWN || wp == WM_MBUTTONDOWN) &&
+        !(((MSLLHOOKSTRUCT *)lp)->flags & LLMHF_INJECTED)) {
+        EnterCriticalSection(&lock); if (momOn && !coastArmed) stop_all(); LeaveCriticalSection(&lock);
+    }
     /* Ready shortcut: Alt + middle click. Only the Alt state is checked, at this moment. */
     if (code == HC_ACTION && wp == WM_MBUTTONDOWN && cfg.ready_key == 1 && enabled &&
         !(((MSLLHOOKSTRUCT *)lp)->flags & LLMHF_INJECTED) && (GetAsyncKeyState(VK_MENU) & 0x8000)) {
@@ -466,6 +482,7 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
                     if (a < 1.0) a = 1.0;
                     if (a > cfg.accel_max) a = cfg.accel_max;
                     pending += delta * cfg.speed * mult * a;
+                    momOn = momTail = 0; momVel = 0;   /* the wheel takes over again; the glide carries on */
                     int waitArmed = 0;
                     /* Flick detection: enough fast clicks in a row -> arm coasting at the current
                        scroll speed. The first click of a run has no speed yet, so it starts at 1. */
@@ -478,6 +495,21 @@ static LRESULT CALLBACK mouse_proc(int code, WPARAM wp, LPARAM lp) {
                         if (!coasting || fabs(v) > fabs(coastVel)) coastVel = v;
                         coastArmed = 1;
                     } else if (!coasting) coastArmed = 0;
+                    /* Momentum strength: grows with speed (from where acceleration starts up
+                       to the flick speed) and with clicks in a row (up to the clicks needed). */
+                    {
+                        static int softRun;
+                        double r0 = cfg.accel_start;
+                        if (r0 > cfg.flick_rate * 0.75) r0 = cfg.flick_rate * 0.5;
+                        if (rate == 0 || rate < r0) softRun = 1; else softRun += clicks;
+                        double sr = (rate - r0) / (cfg.flick_rate - r0);
+                        double sc = (softRun - 1.0) / (cfg.flick_clicks - 1.0);
+                        if (sr < 0) sr = 0;
+                        if (sr > 1) sr = 1;
+                        if (sc < 0) sc = 0;
+                        if (sc > 1) sc = 1;
+                        softStrength = (coastArmed || cfg.coast_time <= 0) ? 0 : sr * sc;
+                    }
                     if (cfg.coast_wait && coastArmed && !coasting) {
                         /* "Wait (ready)": a flick only arms the coast. Drop the flick's distance
                            and let the page ease to a stop from its current speed. */
@@ -554,7 +586,7 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
     while (running) {
         int idle;
         EnterCriticalSection(&lock);
-        idle = (pending == 0 && vel == 0 && !coastArmed);
+        idle = (pending == 0 && vel == 0 && !coastArmed && !momOn && softStrength == 0);
         LeaveCriticalSection(&lock);
         if (idle) {                       /* nothing to do: sleep until the next wheel tick */
             gliding = 0;
@@ -584,14 +616,10 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
 
         /* Advance the glide by exactly one display frame per step, so steps are even. */
         double dt = (double)period / (double)qpcFreq;
-        /* Minimum glide speed ~3 lines/s on screen, whatever Windows' lines-per-notch is:
-           in wheel units that's 360/lines per second. */
-        UINT wlines = 3;
+        UINT wlines = 3;                  /* Windows' lines per wheel click */
         SystemParametersInfoA(SPI_GETWHEELSCROLLLINES, 0, &wlines, 0);
         if (wlines == 0 || wlines == WHEEL_PAGESCROLL || wlines > 100) wlines = (wlines == 0 ? 3 : 20);
         wlinesG = wlines;
-        double minStep = floor(360.0 / wlines * dt + 0.5);
-        if (minStep < 1) minStep = 1;
         int emit = 0, f;
         EnterCriticalSection(&lock);
         if (coastArmed && !coasting) {
@@ -631,18 +659,83 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
                 if (coastVel < -maxV) coastVel = -maxV;
                 pending += coastVel * dt;
                 coastElapsed += dt;
-                /* A coast the user has steered or nudged holds its speed; otherwise it runs down. */
-                if (!coastHeld && cfg.coast_time < 999) coastVel *= exp(-dt / (cfg.coast_time / 3.0));
+                /* A coast the user has steered or nudged holds its speed; otherwise it runs down:
+                   exponentially at first, then (the tail) easing out to a true standstill. */
+                if (!coastHeld && cfg.coast_time < 999) {
+                    if (coastTail) {
+                        tailT += dt;
+                        double u = 1.0 - tailT / tailLen;
+                        if (u < 0) u = 0;
+                        coastVel = tailDir * tailV0 * u * u;
+                    } else coastVel *= exp(-dt / (cfg.coast_time / 3.0));
+                }
             }
             if (coastHeld) {
+                coastTail = 0;
                 /* Held coasts may pass through zero (to reverse). With "until I click" they
                    never end by themselves; otherwise one that sits still for 1 s ends. */
                 if (fabs(coastVel) < stillV && !cfg.until_click && !coastWaiting) slowTime += frames * dt; else slowTime = 0;
                 if (slowTime > 1.0) { coastArmed = coasting = 0; coastVel = 0; coastHeld = steerEngaged = 0; pending = 0; vel = 0; }
-            } else if (fabs(coastVel) < endV || cfg.coast_time <= 0) {
+            } else if (cfg.coast_time <= 0) {
                 coastArmed = coasting = 0; coastVel = 0;
+            } else if (!coastTail && fabs(coastVel) < endV) {
+                /* Ran down: instead of stopping dead at ~3 lines/s, ease the speed out to zero
+                   (v0 * (1 - t/T)^2). T = 2 * tau matches the exponential's slowing at the
+                   hand-off, kept to about a second. */
+                coastTail = 1;
+                tailDir = coastVel > 0 ? 1 : -1;
+                tailV0 = fabs(coastVel); tailT = 0;
+                tailLen = 2.0 * cfg.coast_time / 3.0;
+                if (tailLen < 0.6) tailLen = 0.6;
+                if (tailLen > 1.2) tailLen = 1.2;
+            } else if (coastTail && (tailT >= tailLen || fabs(coastVel) < stillV)) {
+                coastArmed = coasting = 0; coastVel = 0; coastTail = 0;
             }
             if (coastElapsed > 1800) stop_all();   /* safety: 30 min */
+        }
+        if (!coastArmed && !coasting && !momOn && softStrength > 0) {
+            /* Momentum: once the wheel goes quiet after a fast run that wasn't a flick, keep
+               the speed on screen and let it run down quickly - the closer the run came to a
+               flick, the longer (up to a 0.6 s time constant, well short of a coast). */
+            LARGE_INTEGER nq; QueryPerformanceCounter(&nq);
+            double quiet = (double)(nq.QuadPart - lastClickQ) / (double)qpcFreq;
+            double wait = lastRate > 0 ? 1.0 / lastRate : 0.08;
+            if (wait < 0.03) wait = 0.03;
+            if (quiet > wait) {
+                double maxTau = cfg.coast_time / 3.0;
+                if (maxTau > 0.6) maxTau = 0.6;
+                double tau = softStrength * maxTau;
+                softStrength = 0;
+                if (tau > 0.05 && vel != 0) {
+                    double w = 4.74 / (cfg.duration_ms / 1000.0);
+                    double lead = 2.0 * vel / w;
+                    momOn = 1; momTail = 0; momVel = vel; momTau = tau; momT = 0;
+                    momLen = 2.0 * tau;
+                    if (momLen < 0.3) momLen = 0.3;
+                    if (momLen > 1.0) momLen = 1.0;
+                    if (fabs(pending) < fabs(lead)) pending = lead;
+                }
+            }
+        }
+        if (momOn) {
+            /* Same shape as a coast's run-down: exponential, then an ease-out tail. */
+            double minV = 360.0 / wlines, stillV = 60.0 / wlines;
+            for (f = 0; f < frames && momOn; f++) {
+                pending += momVel * dt;
+                momT += dt;
+                if (!momTail) {
+                    momVel *= exp(-dt / momTau);
+                    if (fabs(momVel) < minV) {
+                        momTail = 1; momT = 0;
+                        momDir = momVel > 0 ? 1 : -1; momV0 = fabs(momVel);
+                    }
+                } else {
+                    double u = 1.0 - momT / momLen;
+                    if (u < 0) u = 0;
+                    momVel = momDir * momV0 * u * u;
+                    if (u == 0 || fabs(momVel) < stillV) { momOn = 0; momVel = 0; }
+                }
+            }
         }
         for (f = 0; f < frames && pending != 0; f++) {
             /* Critically damped spring: velocity ramps up and down smoothly.
@@ -651,16 +744,17 @@ static DWORD WINAPI anim_thread(LPVOID unused) {
             vel += (w * w * pending - 2.0 * w * vel) * dt;
             double step = vel * dt;
             if (step * pending < 0 && !coasting) { vel = 0; step = 0; }   /* never scroll backwards (except steering a coast) */
-            /* Minimum speed: at least `minStep` whole units every frame. Without it the
-               glide's tail crawls in sub-unit amounts, which come out as an uneven
-               move/pause/move stutter right as the scroll comes to rest. */
-            if (fabs(step) < minStep) step = pending > 0 ? minStep : -minStep;
+            /* Minimum speed: at least 1 whole unit every frame. Without it the glide's
+               tail crawls in sub-unit amounts, which come out as an uneven
+               move/pause/move stutter right as the scroll comes to rest. Kept at 1 unit
+               (not a fixed lines/s) so the spring can ease out almost to a standstill. */
+            if (fabs(step) < 1) step = pending > 0 ? 1 : -1;
             if (fabs(step) > fabs(pending)) step = pending;        /* never overshoot */
             pending -= step;
             carry += step;
             if (fabs(pending) < 0.5) { carry += pending; pending = 0; vel = 0; }
         }
-        if (pending == 0 && !coasting) { emit = (int)lround(carry); carry = 0; vel = 0; }
+        if (pending == 0 && !coasting && !momOn) { emit = (int)lround(carry); carry = 0; vel = 0; }
         else { emit = (int)carry; carry -= emit; }
         LeaveCriticalSection(&lock);
 

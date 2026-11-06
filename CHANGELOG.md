@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- **Softer endings:** a coast that runs down now eases out to a full stop over its last second, instead of stopping suddenly at a slow crawl. Ordinary scrolling eases out the same way, which shows most with a long glide duration.
+- **Momentum:** fast scrolling that isn't quite a flick now carries on a little after the wheel stops, more the faster and longer you spin, so scrolling builds up gradually toward a coast. Coasts themselves still need the full flick. A click stops the momentum and still goes through as a normal click.
+
 ## 1.0.1 — 2026
 
 - **Store version:** *Start with Windows* in the tray menu now shows a check mark when it's on, and clicking it switches it on or off. If you've turned Screzy off on Windows' Startup apps page, the item reads *Start with Windows…* and opens that page, because only you can turn it back on there.
