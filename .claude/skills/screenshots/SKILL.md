@@ -10,18 +10,28 @@ headline on the left, an invented article in a plain window, and the **real** Sc
 its Preferences window, tray menu, *Running apps…* menu and coast badge. Only the wallpaper,
 captions, shadows, taskbar trimming and the pointer arrow are made by the script.
 
-Output goes to `inbox/graphics/store-screenshots/` (git-ignored). Nothing reaches `store/listing/`
-until the user has looked at the images and agreed.
+It also writes `preferences.png`: the plain Preferences window with all defaults and no per-app
+rules, for `docs/preferences.png` (README) and `website/assets/preferences.png`. It's kept at full
+capture size; both pages set its display size (566×672 at 150% scaling).
+
+Screzy always runs with a **fresh settings file**, so every slider shows its default. The Store shots
+then add two neutral rules (`notepad.exe` 1.5×, `mspaint.exe` off).
+
+Output goes to `inbox/graphics/store-screenshots/` (git-ignored). Nothing reaches `store/listing/`,
+`docs/` or `website/` until the user has looked at the images and agreed.
 
 ## Before you run it
 
-1. **Captions.** Read `scripts/shots.json` against `README.md` and the current Preferences. Every
+1. **Version.** The Preferences title shows `APP_VERSION`. Capture after the version bump for the
+   release the images are for, not before.
+2. **Captions.** Read `scripts/shots.json` against `README.md` and the current Preferences. Every
    headline and sentence must describe what the app does *now*. Fix them first. Plain, friendly
-   English, sentence case (`CLAUDE.md`, Style).
-2. **Tell the user** what will happen: for about 30 seconds the pointer moves on its own, their
+   English, sentence case (`CLAUDE.md`, Style). Set `badge` on the coast shot only if the app really
+   shows a badge in that situation (check `ind_wanted()` in `src/screzy.c`).
+3. **Tell the user** what will happen: for about 30 seconds the pointer moves on its own, their
    Screzy is stopped, and a settings file with neutral per-app rules is swapped in. Both come back
    at the end (the script checks the settings file byte for byte). Ask them not to touch the mouse.
-3. Requirements: Windows with Microsoft Edge, `gcc` and `windres` on PATH (w64devkit), Python with
+4. Requirements: Windows with Microsoft Edge, `gcc` and `windres` on PATH (w64devkit), Python with
    Pillow, and the taskbar on the primary screen at the bottom.
 
 ## Run
@@ -42,11 +52,15 @@ Then **look at every image** (Read the PNGs) before showing the user. Check:
 - Text isn't clipped. The caption doesn't run into the window, and menus sit above the taskbar.
 - The Preferences window is fully painted (no blank group boxes).
 - The tray menu is the Store version's (*Start with Windows*, no *.ini* items).
+- `preferences.png` shows default values and an empty rules list. The Store shots show the two rules.
+- The title shows the right version.
 
 ## Hand-off
 
 When the user approves: copy the PNGs to `store/listing/screenshot-<n>-<name>.png`, update the
-numbered list under **Screenshots** in `store/README.md`, and commit. Remind them that screenshots
+numbered list under **Screenshots** in `store/README.md`, copy `preferences.png` over both
+`docs/preferences.png` and `website/assets/preferences.png` (update the `alt` text in
+`website/index.html` if the window's sections changed), and commit. `website/` goes live on push. Remind them that screenshots
 are uploaded by hand in Partner Center (Store listings → English → Screenshots). A new package
 doesn't carry them (`RELEASING.md`, "What needs what").
 

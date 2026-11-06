@@ -75,8 +75,8 @@ def taskbar(c):
     """Real taskbar, trimmed: Start (+ first pin) on the left, the tray on the right, Screzy's icon shown in it."""
     tb = img('taskbar.png')
     h = tb.height
-    bar = Image.new('RGBA', tb.size, tb.getpixel((tb.width // 2, h // 2)))
-    bar.paste(tb.crop((0, 0, int(107 * S), h)), (0, 0))
+    bar = tb.crop((tb.width // 2, 0, tb.width // 2 + 1, h)).resize(tb.size)   # an empty column, top border included
+    bar.paste(tb.crop((0, 0, int(100 * S), h)), (0, 0))
     right = tb.crop((tb.width - int(280 * S), 0, tb.width, h))
     bar.paste(right, (tb.width - right.width, 0))
     ip = int(16 * S)
@@ -127,7 +127,7 @@ def caption(c, shot, width):
     d.text((x, y), line, font=sf, fill=MUTED)
     y += int(76 * K)
     if shot.get('legend'):                              # enlarged badge with a short explanation
-        badge, _ = indicator('down')
+        badge, _ = indicator(shot.get('badge') or 'down')
         badge = badge.resize((int(120 * K), int(120 * K)), Image.LANCZOS)
         y += int(60 * K)
         c.alpha_composite(badge, (x, y))
@@ -164,8 +164,9 @@ for shot in shots:
     if kind == 'coast':
         c, wx, wy = scene(shot, 'page-mid.png')
         cx, cy = wx + int((W - M - wx) * 0.63), wy + int(760 * K)          # pointer over the text column
-        badge, size = indicator('down')
-        c.alpha_composite(badge, (cx + size * 9 // 16, cy + size * 5 // 8))   # same offset as ind_tick() in src/screzy.c
+        if shot.get('badge'):                         # only where the app shows one (see SKILL.md)
+            badge, size = indicator(shot['badge'])
+            c.alpha_composite(badge, (cx + size * 9 // 16, cy + size * 5 // 8))   # same offset as ind_tick() in src/screzy.c
         c.alpha_composite(pointer(), (cx - 4, cy - 4))
     elif kind == 'prefs':
         c, _, _ = scene(shot, 'page-top.png', dim=True)
@@ -195,3 +196,8 @@ for shot in shots:
         paste_window(c, menu, tray_x - menu.width // 2 - int(60 * K), TBY - menu.height - int(18 * K), shadow=24, alpha=120)
     c.convert('RGB').save(os.path.join(OUT, shot['file']))
     print('wrote', shot['file'])
+
+# Plain Preferences window (defaults, no rules) for docs/preferences.png and website/assets/preferences.png.
+# Kept at full size so it stays sharp on high-DPI screens; the pages set its display size.
+img('prefs-plain.png').convert('RGB').save(os.path.join(OUT, 'preferences.png'), optimize=True)
+print('wrote preferences.png')

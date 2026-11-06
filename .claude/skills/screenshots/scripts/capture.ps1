@@ -79,10 +79,10 @@ $runPath = if ($running) { $running.Path } else { $null }
 $pkg = Get-AppxPackage *Screzy* -ErrorAction SilentlyContinue | Select-Object -First 1
 try {
     if ($running) { Stop-Process -Name Screzy -Force; Start-Sleep -Milliseconds 800 }
-    $text = if ($hadIni) { [Text.Encoding]::UTF8.GetString($orig) } else { "[general]`r`n" }
-    if ($text -match '(?m)^\[apps\]') { $text = $text -replace '(?s)\[apps\].*$', '' }
+    # A fresh settings file, so every slider shows its default. (An empty [general] section also
+    # keeps Screzy from copying an old glidescroll.ini over on first start.)
     New-Item -ItemType Directory -Force (Split-Path $ini) | Out-Null
-    [IO.File]::WriteAllText($ini, $text.TrimEnd() + "`r`n[apps]`r`nnotepad.exe=1.5`r`nmspaint.exe=off`r`n")
+    [IO.File]::WriteAllText($ini, "[general]`r`n")
 
     Start-Process "$Work\demo\Screzy.exe" | Out-Null
     $pw = Wait-Window 'ScrezyPrefs' $N 5000
@@ -91,8 +91,12 @@ try {
     $main = [Cap]::FindWindow('ScrezyWnd', $N)
     Start-Sleep -Seconds 2                                                   # let every control paint
     [void][Cap]::SetForegroundWindow($pw); Start-Sleep -Milliseconds 1200
-    $pr = [Cap]::Frame($pw); [Cap]::Grab($pr, "$Work\prefs.png")
-    $meta.prefs = $pr
+    $pr = [Cap]::Frame($pw); [Cap]::Grab($pr, "$Work\prefs-plain.png")     # defaults, no rules: docs + website
+
+    # Two neutral per-app rules for the Store shots. Opening the tray menu (next) makes Screzy
+    # reread the file and refresh the open Preferences window.
+    Start-Sleep -Milliseconds 1100                                           # new modified time
+    [IO.File]::AppendAllText($ini, "[apps]`r`nnotepad.exe=1.5`r`nmspaint.exe=off`r`n")
 
     # tray menu, opened the way a right-click on the tray icon does
     [void][Cap]::SetCursorPos($sw - [int](360 * $scale), $sh - [int](40 * $scale))
@@ -103,6 +107,10 @@ try {
     [Cap]::Grab([Cap]::Frame($m), "$Work\tray-menu.png")
     [void][Cap]::PostMessage($m, 0x100, [IntPtr]0x1B, $Z); Start-Sleep -Milliseconds 400
     [void][Cap]::SetCursorPos([int]($sw / 2), [int]($sh / 2)); Start-Sleep -Milliseconds 600   # no taskbar previews
+
+    [void][Cap]::SetForegroundWindow($pw); Start-Sleep -Milliseconds 1200
+    $pr = [Cap]::Frame($pw); [Cap]::Grab($pr, "$Work\prefs.png")            # same, with the two rules
+    $meta.prefs = $pr
 
     # Running apps... picker, with the pointer on the last item
     [void][Cap]::SetForegroundWindow($pw); Start-Sleep -Milliseconds 600
