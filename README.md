@@ -27,7 +27,7 @@ A normal mouse wheel scrolls in jumps. Screzy turns each click into a smooth gli
 
 ## Install
 
-**Microsoft Store:** [get Screzy from the Store](https://apps.microsoft.com/detail/9PFTRF7TP5PS?mode=direct). It's the easiest option. Updates are automatic and there are no security warnings.
+**Microsoft Store:** [get Screzy from the Store](https://apps.microsoft.com/detail/9PFTRF7TP5PS). It's the easiest option. Updates are automatic and there are no security warnings.
 
 **Download:** grab `Screzy.exe` from the [latest release](../../releases/latest) and run it. Nothing to install; it lives in the system tray. Because the download isn't code-signed, Windows may show a SmartScreen warning on first run. Choose **More info → Run anyway**, or right-click the file → **Properties → Unblock** first.
 

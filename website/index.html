@@ -284,7 +284,7 @@ footer a { color: var(--muted); }
         <p class="lead">Scroll easy. Flick to coast. Steer with mouse or rollerbar.</p>
         <p class="sub">Easy, smooth mouse-wheel scrolling for every Windows app.</p>
         <div class="actions">
-          <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS?mode=direct">
+          <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
             <picture>
               <source srcset="assets/ms-store-badge-light.svg" media="(prefers-color-scheme: dark)">
               <img src="assets/ms-store-badge-dark.svg" width="205" height="56" alt="Download from the Microsoft Store">
@@ -424,7 +424,7 @@ footer a { color: var(--muted); }
         </details>
         <details>
           <summary>Where did Microsoft.Services.Store.winmd come from?</summary>
-          <p>If you click <em>Get</em> on the Microsoft Store website, your browser downloads a small installer from Microsoft. When it runs, it leaves a file called <em>Microsoft.Services.Store.winmd</em> next to itself, usually in Downloads or on your desktop. Both files come from Microsoft, not from Screzy. Once Screzy is installed, you can delete them. The Store button on this page opens the Store app directly, so you don't get these files.</p>
+          <p>If you click <em>Get</em> on the Microsoft Store website, your browser downloads a small installer from Microsoft. When it runs, it leaves a file called <em>Microsoft.Services.Store.winmd</em> next to itself, usually in Downloads or on your desktop. Both files come from Microsoft, not from Screzy. Once Screzy is installed, you can delete them. To avoid them, install and update Screzy in the Microsoft Store app. On a Windows PC, the Store button on this page opens the app directly.</p>
         </details>
         <details>
           <summary>Does it work with my touchpad?</summary>
@@ -458,7 +458,7 @@ footer a { color: var(--muted); }
       <h2 id="h-final"><span class="name" data-text="Screzy">Screzy</span></h2>
       <p>Free for Windows 10 and 11. Scroll, flick. Feel the difference.</p>
       <div class="actions">
-        <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS?mode=direct">
+        <a class="store-badge" href="https://apps.microsoft.com/detail/9PFTRF7TP5PS">
           <picture>
             <source srcset="assets/ms-store-badge-light.svg" media="(prefers-color-scheme: dark)">
             <img src="assets/ms-store-badge-dark.svg" width="205" height="56" alt="Download from the Microsoft Store">
@@ -604,6 +604,12 @@ footer a { color: var(--muted); }
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
     window.scrollTo({ top: 0, behavior: still ? 'auto' : 'smooth' });
   });
+
+  /* ---- on Windows, Store buttons open the Store app itself. The Store website would
+     download Microsoft's installer, which leaves Microsoft.Services.Store.winmd behind ---- */
+  const ua = navigator.userAgentData;
+  if ((ua && ua.platform === 'Windows') || /Windows NT/.test(navigator.userAgent))
+    document.querySelectorAll('.store-badge').forEach(a => { a.href = 'ms-windows-store://pdp/?productid=9PFTRF7TP5PS'; });
 
   /* ---- close the phone menu after picking a link, or when tapping elsewhere ---- */
   const menu = document.querySelector('.menu');
