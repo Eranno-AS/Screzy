@@ -4,7 +4,7 @@ Context for Claude Code (and other AI assistants) working in this repository.
 
 ## What this is
 
-**Screzy**: *Scroll easy. Flick to coast. Steer with mouse or rollerbar.*
+**Screzy**: *Scroll easy. Flick to coast.*
 It is a Windows 10/11 system-tray utility that makes mouse-wheel scrolling smooth in every app. It adds acceleration, flick-to-coast momentum, and lets you steer a coast with the mouse or a Contour RollerMouse rollerbar.
 
 - Publisher: **Eranno AS** (Norway). Licence: MIT. Website: https://screzy.com

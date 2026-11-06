@@ -1,6 +1,6 @@
 /*
  * Screzy - easy, smooth mouse-wheel scrolling for Windows.
- * Scroll easy. Flick to coast. Steer with mouse or rollerbar.
+ * Scroll easy. Flick to coast.
  * Copyright (c) 2026 Eranno AS. Released under the MIT License (see LICENSE).
  *
  * Intercepts vertical wheel ticks with a low-level mouse hook, swallows them,
@@ -1558,7 +1558,7 @@ static LRESULT CALLBACK wnd_proc(HWND h, UINT msg, WPARAM wp, LPARAM lp) {
         case ID_ABOUT:
             MessageBoxA(NULL,
                 "Screzy " APP_VERSION "\n"
-                "Scroll easy. Flick to coast. Steer with mouse or rollerbar.\n\n"
+                "Scroll easy. Flick to coast.\n\n"
                 "Copyright (c) 2026 Eranno AS\n"
                 "Free and open source under the MIT License.\n\n"
                 "screzy.com",

@@ -54,10 +54,10 @@ Create a submission in Partner Center and fill in these sections:
 | Submission options → Restricted capabilities | Paste the `runFullTrust` justification below |
 | Notes for certification | Paste the testing notes below |
 
-**Screenshots.** At least one is required, as a PNG of 1366×768 or larger, taken on real Windows. The current set is in `store/listing/`, in this order:
+**Screenshots.** At least one is required, as a PNG of 1366×768 or larger, taken on real Windows. The set in `store/listing/`, in this order:
 
-1. `screenshot-1-coast.png`: a coast running, with the indicator by the pointer.
-2. `screenshot-2-preferences.png`: the Preferences window over a document.
+1. `screenshot-1-coast.png`: a page coasting after a flick (normal coasts show no badge).
+2. `screenshot-2-preferences.png`: the Preferences window, with its Scrolling, Coasting and Autoscroll sections, over a document.
 3. `screenshot-3-tray.png`: the tray menu open.
 4. `screenshot-4-per-app.png`: a per-app rule being added with **Running apps…**.
 
@@ -66,37 +66,35 @@ Create a submission in Partner Center and fill in these sections:
 **Product name:** Screzy – Easy, smooth scrolling
 
 **Short description:**
-Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every mouse-wheel click into a smooth glide in any Windows app, speeds up when you spin faster, and keeps coasting when you flick, like scrolling on a phone.
+Scroll easy. Flick to coast. Screzy turns every mouse-wheel click into a smooth glide in any Windows app, and keeps the page coasting when you flick, like scrolling on a phone.
 
 **Description:**
 
-> Scroll easy. Flick to coast. Steer with mouse or rollerbar.
+> Scroll easy. Flick to coast.
 >
 > A normal mouse wheel scrolls in jumps. Screzy makes every app scroll smoothly: browsers, Office, PDF readers, code editors and more.
 >
-> Each wheel click becomes a smooth glide that eases in and out, timed to your monitor's refresh rate, so the motion stays fluid on 60, 120 and 144 Hz screens. Spin the wheel faster and it accelerates, so long pages go by quickly while slow scrolling stays precise.
+> Each wheel click becomes a smooth glide, timed to your screen's refresh rate. Spin faster and it accelerates, so long pages fly by while slow scrolling stays precise.
 >
-> Flick the wheel and let go: the page keeps coasting and gently runs down, just like on a phone. While it coasts, steer it: wheel clicks speed it up or slow it down, and a click stops it. Moved the pointer to click a tab or a button? That click works as normal. Or switch a flick to autoscroll and move the pointer down or up to scroll hands-free, faster the further you go. It works with the rollerbar on a Contour RollerMouse too.
+> Flick the wheel and the page keeps coasting, then gently runs down, like on a phone. Wheel clicks speed it up or slow it down, and a click stops it. Clicked a tab or a button instead? That click works as normal.
 >
-> For hands-free reading, make coasts calmer, or let a flick start autoscroll. Good defaults out of the box, and one clear Preferences window to fine-tune. Give individual apps their own distance, or switch smoothing off for them, such as games.
+> Prefer hands-free reading? Let a flick start autoscroll, and steer it with the mouse, the wheel or a RollerMouse rollerbar.
+>
+> Good defaults out of the box, one clear Preferences window to fine-tune, and per-app rules for apps such as games.
 >
 > Screzy lives quietly in the system tray, uses no CPU while you're not scrolling, and never connects to the internet. No accounts, no ads, no tracking. It's free and open source.
 >
-> Tip: for the smoothest result, set Windows' "Lines to scroll at a time" to 1 (Settings → Bluetooth & devices → Mouse), or 3 if you prefer, then adjust the distance in Screzy.
+> Tip: for the smoothest result, set Windows' "Lines to scroll at a time" to 1 (Settings → Bluetooth & devices → Mouse), or 3 if you prefer.
 
-**What's new in this version:** *Start with Windows* in the tray menu now shows a check mark and switches startup on and off. Changes made to the settings file in a text editor are picked up without restarting Screzy.
+**What's new in this version:** A simpler Preferences window with better defaults. Glides and coasts ease out softly. Coasts can be calmer or livelier. Clicking a tab or a button during a coast now works first time. New optional autoscroll, steered with the mouse, the wheel or a RollerMouse bar.
 
 **Product features:**
-- Smooth, eased scrolling for every app
-- Steps timed to your monitor's refresh rate
+- Smooth, eased scrolling in every app
 - Scroll acceleration when you spin the wheel faster
-- Flick to coast, with a click to stop
-- Steer a coast's speed with the wheel
-- Optional autoscroll: steer with the mouse or a RollerMouse rollerbar
-- Per-app speed, or smoothing off per app
-- Adjustable distance, glide time, acceleration and coasting
-- Leaves touchpads, Ctrl+wheel zoom and admin windows alone
-- Tray icon shows when smoothing is on or off
+- Flick to coast, steer it with the wheel, click to stop
+- Optional autoscroll with the mouse, wheel or RollerMouse rollerbar
+- Per-app distance, or smoothing off per app
+- Leaves touchpads, Ctrl + wheel zoom and admin windows alone
 - No internet connection, no data collection
 - Free and open source (MIT)
 
@@ -114,4 +112,4 @@ Scroll easy. Flick to coast. Steer with mouse or rollerbar. Screzy turns every m
 
 **Notes for certification:**
 
-> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Flick the wheel quickly to see it coast, and click to stop it. A click near where the coast started is intentionally not passed to the window underneath (it only stops the coast). A click after moving the pointer away stops the coast and goes through normally, and a coast also stops when the pointer moves to another window or another app comes to the front. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, turns "Start with Windows" on and off (it shows the current state with a check mark, and opens Windows Startup settings if the user has switched it off there), and exits the app. Note: touchpads and precision/high-resolution wheels are intentionally passed through unchanged. Testing requires a mouse with a standard notched scroll wheel.
+> Screzy runs in the system tray. On first launch (and whenever the app is launched again) the Preferences window opens. To test: open any long web page or document and scroll with a mouse wheel. Scrolling glides smoothly instead of jumping. Spin the wheel quickly (10 or more fast clicks) to see the page coast, then click where you were scrolling to stop it. That click intentionally only stops the coast and isn't passed to the window underneath. A click after moving the pointer away goes through normally. Optional autoscroll can be switched on in the Autoscroll section of Preferences. Use the "Try it" box in Preferences to test settings. The tray icon's right-click menu toggles smoothing, turns "Start with Windows" on and off, and exits the app. Touchpads and precision/high-resolution wheels are intentionally passed through unchanged, so testing requires a mouse with a standard notched scroll wheel. Screzy reads no keyboard input.

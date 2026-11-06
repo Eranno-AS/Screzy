@@ -48,7 +48,7 @@ If Git asks who you are, run `git config --global user.name "Your Name"` and `gi
 **Or with the GitHub CLI:**
 
 ```powershell
-gh repo create Screzy --public --source . --push --description "Scroll easy. Flick to coast. Steer with mouse or rollerbar. Smooth scrolling for Windows."
+gh repo create Screzy --public --source . --push --description "Scroll easy. Flick to coast. Smooth scrolling for Windows."
 ```
 
 Then replace the placeholders with the real address, e.g. `https://github.com/Eranno-AS/Screzy`:

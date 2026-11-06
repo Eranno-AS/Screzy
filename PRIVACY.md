@@ -9,7 +9,7 @@
 To smooth your scrolling, Screzy has to see some mouse input as it happens:
 
 - **Mouse-wheel movement.** Screzy intercepts wheel clicks and replaces them with many small, smooth scroll steps. It needs this to work at all.
-- **Mouse-button presses (left, middle, right).** Screzy only checks whether a button was pressed, and how far the pointer is from where the coast started, so that a click can stop a coasting scroll. When a click near that spot stops a coast, Screzy doesn't pass that click on. While a coast runs, Screzy also checks which window is under the pointer and which app is in front, so the coast stops if you move elsewhere. None of this is stored.
+- **Mouse clicks and the window under the pointer, while a coast runs.** A click stops the coast. If you click where you were scrolling, Screzy doesn't pass that click on; a click elsewhere goes through as normal. Screzy also notices when the pointer moves to another window or another app comes to the front, so the coast stops there.
 - **Up/down pointer movement, only in autoscroll.** With *A flick starts autoscroll instead of a coast* turned on, Screzy uses how far the pointer is above or below where the coast began to set its speed, until you click. At all other times, pointer movement is ignored.
 - **The program name under the pointer** (for example `chrome.exe`). Screzy checks this so your per-app rules apply, such as a different scroll distance or smoothing turned off for one app.
 - **The list of open programs.** Screzy reads this only when you press **Running apps…** in Preferences, so you can pick one from a menu.
