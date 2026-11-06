@@ -59,6 +59,7 @@ Create a submission in Partner Center and fill in these sections:
 1. `screenshot-1-coast.png`: a coast running, with the indicator by the pointer.
 2. `screenshot-2-preferences.png`: the Preferences window over a document.
 3. `screenshot-3-tray.png`: the tray menu open.
+4. `screenshot-4-per-app.png`: a per-app rule being added with **Running apps…**.
 
 ## 4. Listing text
 
