@@ -48,4 +48,4 @@ Screzy collects no data from anyone, including children.
 
 If this statement changes, the new version will be published at screzy.com/privacy and in the Screzy source repository, with a new effective date.
 
-Questions? Email Eranno AS at <info@screzy.com>, or open an issue in the Screzy repository on GitHub.
+Questions? Email Eranno AS at <screzy@eranno.com>, or open an issue in the Screzy repository on GitHub.
