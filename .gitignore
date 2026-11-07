@@ -4,3 +4,6 @@ store/out/
 *.msix
 *.appx
 Archive/
+
+# Personal Claude Code settings
+.claude/settings.local.json

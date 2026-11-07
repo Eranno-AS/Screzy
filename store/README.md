@@ -47,7 +47,7 @@ Create a submission in Partner Center and fill in these sections:
 | Section | What to enter |
 |---|---|
 | Pricing and availability | **Free**, all markets, public visibility |
-| Properties | Category **Utilities & tools**. Privacy policy URL `https://screzy.com/privacy`. Website `https://screzy.com`. Support contact: `info@screzy.com`. Product declarations: leave defaults |
+| Properties | Category **Utilities & tools**. Privacy policy URL `https://screzy.com/privacy`. Website `https://screzy.com`. Support contact: `https://github.com/Eranno-AS/Screzy/issues`. Product declarations: leave defaults |
 | Age ratings | Answer the IARC questionnaire: no violence, no user interaction, no data sharing, no purchases. Expect a 3+ / Everyone rating |
 | Packages | Upload `Screzy_1.0.0.0_x64.msix` |
 | Store listings (English) | Copy the text from section 4 below, and upload images from `store/listing/` plus screenshots |
@@ -89,14 +89,14 @@ Scroll easy. Flick to coast. Screzy turns every mouse-wheel click into a smooth 
 **What's new in this version:** A simpler Preferences window with better defaults. Glides and coasts ease out softly. Coasts can be calmer or livelier. Clicking a tab or a button during a coast now works first time. New optional autoscroll, steered with the mouse, the wheel or a RollerMouse bar.
 
 **Product features:**
-- Smooth, eased scrolling in every app
-- Scroll acceleration when you spin the wheel faster
-- Flick to coast, steer it with the wheel, click to stop
-- Optional autoscroll with the mouse, wheel or RollerMouse rollerbar
-- Per-app distance, or smoothing off per app
-- Leaves touchpads, Ctrl + wheel zoom and admin windows alone
-- No internet connection, no data collection
-- Free and open source (MIT)
+- Smooth, eased scrolling in every app.
+- Scroll acceleration when you spin the wheel faster.
+- Flick to coast, steer it with the wheel, click to stop.
+- Optional autoscroll with the mouse, wheel or RollerMouse rollerbar.
+- Per-app distance, or smoothing off per app.
+- Leaves touchpads, Ctrl + wheel zoom and admin windows alone.
+- No internet connection, no data collection.
+- Free and open source (MIT).
 
 **Search terms:** smooth scrolling · mouse wheel · smooth scroll · autoscroll · momentum scrolling · scroll acceleration · RollerMouse
 
